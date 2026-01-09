@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poker Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --bg-card: #1c2128;
+            --border-color: #30363d;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --accent-green: #3fb950;
+            --accent-green-dim: rgba(63, 185, 80, 0.15);
+            --accent-red: #f85149;
+            --accent-red-dim: rgba(248, 81, 73, 0.15);
+            --accent-blue: #58a6ff;
+            --accent-purple: #a371f7;
+            --accent-gold: #d4a72c;
+            --accent-gold-dim: rgba(212, 167, 44, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* Header */
+        .header {
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            background: linear-gradient(135deg, var(--accent-gold) 0%, #f0d78c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Filters */
+        .filters {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .filters-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+        }
+
+        .date-shortcuts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .date-shortcut {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 6px 14px;
+            color: var(--text-secondary);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .date-shortcut:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--accent-blue);
+        }
+
+        .date-shortcut.active {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+            color: white;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .filter-group label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: var(--text-primary);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .filter-group select:hover,
+        .filter-group input:hover {
+            border-color: var(--accent-blue);
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15);
+        }
+
+        .filter-actions {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .btn-reset {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 16px;
+            color: var(--text-secondary);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-reset:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--text-muted);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .stat-value.positive {
+            color: var(--accent-green);
+        }
+
+        .stat-value.negative {
+            color: var(--accent-red);
+        }
+
+        .stat-value.neutral {
+            color: var(--text-primary);
+        }
+
+        /* Chart Section */
+        .chart-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .chart-toggle {
+            display: flex;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .chart-toggle button {
+            background: transparent;
+            border: none;
+            padding: 8px 16px;
+            color: var(--text-secondary);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .chart-toggle button.active {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .chart-toggle button:hover:not(.active) {
+            color: var(--text-primary);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 350px;
+        }
+
+        /* Breakdown Section */
+        .breakdown-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .breakdown-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .breakdown-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .breakdown-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .breakdown-controls label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .breakdown-controls select {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: var(--text-primary);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .breakdown-table-wrapper {
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .breakdown-table-wrapper table {
+            width: 100%;
+        }
+
+        .breakdown-table-wrapper th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        /* Table Section */
+        .table-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .table-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .table-info {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: var(--bg-tertiary);
+            padding: 14px 16px;
+            text-align: left;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+
+        th:hover {
+            background: var(--border-color);
+        }
+
+        th.sorted-asc::after {
+            content: ' ↑';
+            color: var(--accent-blue);
+        }
+
+        th.sorted-desc::after {
+            content: ' ↓';
+            color: var(--accent-blue);
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(88, 166, 255, 0.05);
+        }
+
+        td.positive {
+            color: var(--accent-green);
+        }
+
+        td.negative {
+            color: var(--accent-red);
+        }
+
+        td.money {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        td.notes {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .type-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .type-badge.tournament {
+            background: var(--accent-purple);
+            color: white;
+        }
+
+        .type-badge.cash {
+            background: var(--accent-green);
+            color: white;
+        }
+
+        .type-badge.rakeback {
+            background: var(--accent-gold);
+            color: var(--bg-primary);
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .pagination button {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 14px;
+            color: var(--text-secondary);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--accent-blue);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination span {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            padding: 0 12px;
+        }
+
+        /* Password Gate */
+        .password-gate {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .password-gate.hidden {
+            display: none;
+        }
+
+        .password-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            max-width: 360px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .password-box h2 {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--accent-gold) 0%, #f0d78c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .password-box p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 24px;
+        }
+
+        .password-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .password-input-group input {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px 16px;
+            color: var(--text-primary);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            text-align: center;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .password-input-group input:focus {
+            outline: none;
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 0 3px rgba(212, 167, 44, 0.2);
+        }
+
+        .password-input-group input.error {
+            border-color: var(--accent-red);
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        .password-input-group button {
+            background: linear-gradient(135deg, var(--accent-gold) 0%, #c9952a 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 14px 24px;
+            color: var(--bg-primary);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .password-input-group button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(212, 167, 44, 0.4);
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--accent-gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Error State */
+        .error {
+            background: var(--accent-red-dim);
+            border: 1px solid var(--accent-red);
+            border-radius: 12px;
+            padding: 20px;
+            color: var(--accent-red);
+            text-align: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard {
+                padding: 16px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stat-card {
+                padding: 16px;
+            }
+
+            .stat-value {
+                font-size: 1.2rem;
+            }
+
+            .chart-container {
+                height: 280px;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            th, td {
+                padding: 10px 12px;
+                font-size: 0.8rem;
+            }
+
+            .chart-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-card {
+                padding: 14px;
+            }
+
+            .stat-value {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Password Gate -->
+    <div id="passwordGate" class="password-gate">
+        <div class="password-box">
+            <h2>♠ Poker Dashboard</h2>
+            <p>Enter password to continue</p>
+            <div class="password-input-group">
+                <input type="password" id="passwordInput" placeholder="Password" autocomplete="off">
+                <button id="passwordSubmit">Enter</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard">
+        <header class="header">
+            <h1>♠ Poker Dashboard</h1>
+            <p>Track your results, analyze your game</p>
+        </header>
+
+        <div id="loading" class="loading">
+            <div class="loading-spinner"></div>
+            <p>Loading your session data...</p>
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+
+        <div id="content" style="display: none;">
+            <!-- Filters -->
+            <section class="filters">
+                <div class="filters-title">Filters</div>
+                <div class="date-shortcuts">
+                    <button class="date-shortcut" data-range="ytd">Year to Date</button>
+                    <button class="date-shortcut" data-range="last-year">Last Year</button>
+                    <button class="date-shortcut" data-range="this-month">This Month</button>
+                    <button class="date-shortcut" data-range="last-month">Last Month</button>
+                    <button class="date-shortcut" data-range="last-30">Last 30 Days</button>
+                    <button class="date-shortcut" data-range="last-90">Last 90 Days</button>
+                    <button class="date-shortcut" data-range="all-time">All Time</button>
+                </div>
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label for="dateFrom">From Date</label>
+                        <input type="date" id="dateFrom">
+                    </div>
+                    <div class="filter-group">
+                        <label for="dateTo">To Date</label>
+                        <input type="date" id="dateTo">
+                    </div>
+                    <div class="filter-group">
+                        <label for="typeFilter">Type</label>
+                        <select id="typeFilter">
+                            <option value="all">All Types</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="subtypeFilter">Sub-type</label>
+                        <select id="subtypeFilter">
+                            <option value="all">All Sub-types</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="gameFilter">Game</label>
+                        <select id="gameFilter">
+                            <option value="all">All Games</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="liveOnlineFilter">Online/Live</label>
+                        <select id="liveOnlineFilter">
+                            <option value="all">All</option>
+                        </select>
+                    </div>
+                    <div class="filter-group filter-actions">
+                        <button class="btn-reset" id="resetFilters">Reset Filters</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Stats -->
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Buy-ins</div>
+                    <div class="stat-value neutral" id="totalBuyins">$0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Cashouts</div>
+                    <div class="stat-value neutral" id="totalCashouts">$0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Net Profit/Loss</div>
+                    <div class="stat-value" id="netProfit">$0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">ROI</div>
+                    <div class="stat-value" id="roi">0%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Sessions</div>
+                    <div class="stat-value neutral" id="sessionCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Win Rate</div>
+                    <div class="stat-value neutral" id="winRate">0%</div>
+                </div>
+            </section>
+
+            <!-- Chart -->
+            <section class="chart-section">
+                <div class="chart-header">
+                    <h2 class="chart-title">Cumulative Performance</h2>
+                    <div class="chart-toggle">
+                        <button id="btnBySession" class="active">By Session</button>
+                        <button id="btnByDate">By Date</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Breakdown -->
+            <section class="breakdown-section">
+                <div class="breakdown-header">
+                    <h2 class="breakdown-title">Performance Breakdown</h2>
+                    <div class="breakdown-controls">
+                        <label for="breakdownBy">Group by:</label>
+                        <select id="breakdownBy">
+                            <option value="game">Game</option>
+                            <option value="type">Type</option>
+                            <option value="subtype">Sub-type</option>
+                            <option value="liveOnline">Online/Live</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="breakdown-table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th data-breakdown-sort="name">Name</th>
+                                <th data-breakdown-sort="sessions">Sessions</th>
+                                <th data-breakdown-sort="buyins">Buy-ins</th>
+                                <th data-breakdown-sort="cashouts">Cashouts</th>
+                                <th data-breakdown-sort="net">Net</th>
+                                <th data-breakdown-sort="roi">ROI</th>
+                                <th data-breakdown-sort="winrate">Win Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody id="breakdownTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Table -->
+            <section class="table-section">
+                <div class="table-header">
+                    <h2 class="table-title">Session History</h2>
+                    <span class="table-info" id="tableInfo">Showing 0 sessions</span>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th data-sort="date">Date</th>
+                                <th data-sort="type">Type</th>
+                                <th data-sort="subtype">Sub-type</th>
+                                <th data-sort="game">Game</th>
+                                <th data-sort="liveOnline">Online/Live</th>
+                                <th data-sort="inFor">In For</th>
+                                <th data-sort="outFor">Out For</th>
+                                <th data-sort="net">Net</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sessionTableBody">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination">
+                    <button id="prevPage">← Previous</button>
+                    <span id="pageInfo">Page 1 of 1</span>
+                    <button id="nextPage">Next →</button>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        // Password Protection
+        const SITE_PASSWORD = 'GarfieldDJ';
+        
+        // Check if already authenticated this session
+        const isAuthenticated = sessionStorage.getItem('pokerDashAuth') === 'true';
+        
+        if (isAuthenticated) {
+            document.getElementById('passwordGate').classList.add('hidden');
+        }
+
+        // Password gate handlers
+        document.getElementById('passwordSubmit').addEventListener('click', checkPassword);
+        document.getElementById('passwordInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') checkPassword();
+        });
+
+        function checkPassword() {
+            const input = document.getElementById('passwordInput');
+            const entered = input.value;
+            
+            if (entered === SITE_PASSWORD) {
+                sessionStorage.setItem('pokerDashAuth', 'true');
+                document.getElementById('passwordGate').classList.add('hidden');
+                init(); // Load the dashboard
+            } else {
+                input.classList.add('error');
+                input.value = '';
+                setTimeout(() => input.classList.remove('error'), 400);
+            }
+        }
+
+        // Configuration
+        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQdTYfCf8JdPJ1HE5DtSDU1I871jNy52tkO87rf_eeW6KwF5ThDYtSjp5N9uAy3ChXvgQ9vXmfcX_FZ/pub?output=csv';
+        const CORS_PROXY = 'https://corsproxy.io/?';
+        // Add timestamp to bust cache and always get fresh data
+        const SHEET_URL = CORS_PROXY + encodeURIComponent(SHEET_CSV_URL + '&_t=' + Date.now());
+        const ROWS_PER_PAGE = 25;
+
+        // State
+        let allSessions = [];
+        let filteredSessions = [];
+        let currentPage = 1;
+        let sortColumn = 'date';
+        let sortDirection = 'desc';
+        let chartInstance = null;
+        let chartMode = 'session'; // 'session' or 'date'
+        let breakdownSortColumn = 'net';
+        let breakdownSortDirection = 'desc';
+
+        // DOM Elements
+        const loadingEl = document.getElementById('loading');
+        const errorEl = document.getElementById('error');
+        const contentEl = document.getElementById('content');
+
+        // Parse currency string to number
+        function parseCurrency(str) {
+            if (!str || str === '') return 0;
+            return parseFloat(str.replace(/[$,]/g, '')) || 0;
+        }
+
+        // Format number as currency
+        function formatCurrency(num) {
+            const absNum = Math.abs(num);
+            const formatted = absNum.toLocaleString('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2
+            });
+            return num < 0 ? `-${formatted}` : formatted;
+        }
+
+        // Parse date string (M/D/YYYY)
+        function parseDate(str) {
+            if (!str || str === '') return null;
+            const parts = str.split('/');
+            if (parts.length !== 3) return null;
+            const month = parseInt(parts[0], 10) - 1;
+            const day = parseInt(parts[1], 10);
+            const year = parseInt(parts[2], 10);
+            return new Date(year, month, day);
+        }
+
+        // Format date for display
+        function formatDate(date) {
+            if (!date) return '';
+            return date.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+
+        // Format date for input
+        function formatDateForInput(date) {
+            if (!date) return '';
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // Parse CSV
+        function parseCSV(csv) {
+            // Normalize line endings
+            const normalizedCsv = csv.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+            const lines = normalizedCsv.split('\n');
+            const sessions = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i];
+                if (!line.trim()) continue;
+
+                // Handle commas within quoted strings
+                const values = [];
+                let current = '';
+                let inQuotes = false;
+
+                for (let char of line) {
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        values.push(current.trim());
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                values.push(current.trim());
+
+                // Skip rows with no date (truly empty rows)
+                const dateStr = values[1] ? values[1].trim() : '';
+                if (!dateStr) continue;
+
+                const date = parseDate(dateStr);
+                if (!date) continue;
+
+                const inFor = parseCurrency(values[6] || '0');
+                const outFor = parseCurrency(values[7] || '0');
+
+                sessions.push({
+                    session: parseInt(values[0], 10) || i,
+                    date: date,
+                    type: (values[2] || '').trim(),
+                    subtype: (values[3] || '').trim(),
+                    game: (values[4] || '').trim(),
+                    liveOnline: (values[5] || '').trim(),
+                    inFor: inFor,
+                    outFor: outFor,
+                    net: outFor - inFor,
+                    notes: (values[10] || '').trim()
+                });
+            }
+
+            return sessions;
+        }
+
+        // Populate filter dropdowns
+        function populateFilters() {
+            const types = [...new Set(allSessions.map(s => s.type).filter(t => t))].sort();
+            const subtypes = [...new Set(allSessions.map(s => s.subtype).filter(t => t))].sort();
+            const games = [...new Set(allSessions.map(s => s.game).filter(t => t))].sort();
+            const liveOnline = [...new Set(allSessions.map(s => s.liveOnline).filter(t => t))].sort();
+
+            const typeFilter = document.getElementById('typeFilter');
+            types.forEach(t => {
+                const option = document.createElement('option');
+                option.value = t;
+                option.textContent = t;
+                typeFilter.appendChild(option);
+            });
+
+            const subtypeFilter = document.getElementById('subtypeFilter');
+            subtypes.forEach(t => {
+                const option = document.createElement('option');
+                option.value = t;
+                option.textContent = t;
+                subtypeFilter.appendChild(option);
+            });
+
+            const gameFilter = document.getElementById('gameFilter');
+            games.forEach(g => {
+                const option = document.createElement('option');
+                option.value = g;
+                option.textContent = g;
+                gameFilter.appendChild(option);
+            });
+
+            const liveOnlineFilter = document.getElementById('liveOnlineFilter');
+            liveOnline.forEach(l => {
+                const option = document.createElement('option');
+                option.value = l;
+                option.textContent = l;
+                liveOnlineFilter.appendChild(option);
+            });
+
+            // Set date range to year-to-date by default
+            if (allSessions.length > 0) {
+                const today = new Date();
+                const startOfYear = new Date(today.getFullYear(), 0, 1);
+                document.getElementById('dateFrom').value = formatDateForInput(startOfYear);
+                document.getElementById('dateTo').value = formatDateForInput(today);
+            }
+        }
+
+        // Parse date input value as local time (not UTC)
+        function parseDateInput(dateStr) {
+            if (!dateStr) return null;
+            const parts = dateStr.split('-');
+            if (parts.length !== 3) return null;
+            return new Date(
+                parseInt(parts[0], 10),
+                parseInt(parts[1], 10) - 1,
+                parseInt(parts[2], 10)
+            );
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const dateFrom = parseDateInput(document.getElementById('dateFrom').value);
+            const dateTo = parseDateInput(document.getElementById('dateTo').value);
+            const type = document.getElementById('typeFilter').value;
+            const subtype = document.getElementById('subtypeFilter').value;
+            const game = document.getElementById('gameFilter').value;
+            const liveOnline = document.getElementById('liveOnlineFilter').value;
+
+            filteredSessions = allSessions.filter(s => {
+                if (dateFrom && s.date < dateFrom) return false;
+                if (dateTo) {
+                    const endOfDay = new Date(dateTo);
+                    endOfDay.setHours(23, 59, 59, 999);
+                    if (s.date > endOfDay) return false;
+                }
+                if (type !== 'all' && s.type !== type) return false;
+                if (subtype !== 'all' && s.subtype !== subtype) return false;
+                if (game !== 'all' && s.game !== game) return false;
+                if (liveOnline !== 'all' && s.liveOnline !== liveOnline) return false;
+                return true;
+            });
+
+            currentPage = 1;
+            sortSessions();
+            updateStats();
+            updateChart();
+            updateTable();
+            updateBreakdown();
+        }
+
+        // Sort sessions
+        function sortSessions() {
+            filteredSessions.sort((a, b) => {
+                let aVal = a[sortColumn];
+                let bVal = b[sortColumn];
+
+                if (sortColumn === 'date') {
+                    aVal = aVal.getTime();
+                    bVal = bVal.getTime();
+                } else if (typeof aVal === 'string') {
+                    aVal = aVal.toLowerCase();
+                    bVal = bVal.toLowerCase();
+                }
+
+                if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+                if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+
+        // Update stats
+        function updateStats() {
+            const totalBuyins = filteredSessions.reduce((sum, s) => sum + s.inFor, 0);
+            const totalCashouts = filteredSessions.reduce((sum, s) => sum + s.outFor, 0);
+            const net = totalCashouts - totalBuyins;
+            const roi = totalBuyins > 0 ? (net / totalBuyins) * 100 : 0;
+            const winningCount = filteredSessions.filter(s => s.net > 0).length;
+            const winRate = filteredSessions.length > 0 ? (winningCount / filteredSessions.length) * 100 : 0;
+
+            document.getElementById('totalBuyins').textContent = formatCurrency(totalBuyins);
+            document.getElementById('totalCashouts').textContent = formatCurrency(totalCashouts);
+
+            const netEl = document.getElementById('netProfit');
+            netEl.textContent = formatCurrency(net);
+            netEl.className = `stat-value ${net >= 0 ? 'positive' : 'negative'}`;
+
+            const roiEl = document.getElementById('roi');
+            roiEl.textContent = `${roi >= 0 ? '+' : ''}${roi.toFixed(1)}%`;
+            roiEl.className = `stat-value ${roi >= 0 ? 'positive' : 'negative'}`;
+
+            document.getElementById('sessionCount').textContent = filteredSessions.length.toLocaleString();
+            document.getElementById('winRate').textContent = `${winRate.toFixed(1)}%`;
+        }
+
+        // Update chart
+        function updateChart() {
+            const canvas = document.getElementById('performanceChart');
+            const ctx = canvas.getContext('2d');
+
+            // Sort by date for chart
+            const sortedSessions = [...filteredSessions].sort((a, b) => a.date - b.date);
+
+            let labels = [];
+            let data = [];
+            let runningTotal = 0;
+
+            if (chartMode === 'session') {
+                sortedSessions.forEach((s, i) => {
+                    runningTotal += s.net;
+                    labels.push(`#${i + 1}`);
+                    data.push(runningTotal);
+                });
+            } else {
+                sortedSessions.forEach((s) => {
+                    runningTotal += s.net;
+                    labels.push(formatDate(s.date));
+                    data.push(runningTotal);
+                });
+            }
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            // Dynamic colors
+            const greenColor = '#3fb950';
+            const redColor = '#f85149';
+            const greenBg = 'rgba(63, 185, 80, 0.15)';
+            const redBg = 'rgba(248, 81, 73, 0.15)';
+
+            // Custom plugin to draw fill with proper colors
+            const customFillPlugin = {
+                id: 'customFillPlugin',
+                beforeDatasetsDraw: (chart) => {
+                    const dataset = chart.data.datasets[0];
+                    const meta = chart.getDatasetMeta(0);
+                    const yScale = chart.scales.y;
+                    const xScale = chart.scales.x;
+                    const chartArea = chart.chartArea;
+                    
+                    if (!chartArea || !meta.data || meta.data.length < 2) return;
+                    
+                    const ctx = chart.ctx;
+                    const zeroY = yScale.getPixelForValue(0);
+                    
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.rect(chartArea.left, chartArea.top, chartArea.width, chartArea.height);
+                    ctx.clip();
+                    
+                    // Draw fills for each segment
+                    for (let i = 0; i < meta.data.length - 1; i++) {
+                        const p0 = meta.data[i];
+                        const p1 = meta.data[i + 1];
+                        const y0 = dataset.data[i];
+                        const y1 = dataset.data[i + 1];
+                        
+                        // Check if segment crosses zero
+                        if ((y0 >= 0 && y1 >= 0) || (y0 < 0 && y1 < 0)) {
+                            // No crossing - single color fill
+                            const color = y0 >= 0 ? greenBg : redBg;
+                            ctx.beginPath();
+                            ctx.moveTo(p0.x, zeroY);
+                            ctx.lineTo(p0.x, p0.y);
+                            ctx.lineTo(p1.x, p1.y);
+                            ctx.lineTo(p1.x, zeroY);
+                            ctx.closePath();
+                            ctx.fillStyle = color;
+                            ctx.fill();
+                        } else {
+                            // Crosses zero - find intersection and draw two triangles
+                            const ratio = Math.abs(y0) / (Math.abs(y0) + Math.abs(y1));
+                            const crossX = p0.x + (p1.x - p0.x) * ratio;
+                            
+                            // First part (from p0 to crossing)
+                            const color0 = y0 >= 0 ? greenBg : redBg;
+                            ctx.beginPath();
+                            ctx.moveTo(p0.x, zeroY);
+                            ctx.lineTo(p0.x, p0.y);
+                            ctx.lineTo(crossX, zeroY);
+                            ctx.closePath();
+                            ctx.fillStyle = color0;
+                            ctx.fill();
+                            
+                            // Second part (from crossing to p1)
+                            const color1 = y1 >= 0 ? greenBg : redBg;
+                            ctx.beginPath();
+                            ctx.moveTo(crossX, zeroY);
+                            ctx.lineTo(p1.x, p1.y);
+                            ctx.lineTo(p1.x, zeroY);
+                            ctx.closePath();
+                            ctx.fillStyle = color1;
+                            ctx.fill();
+                        }
+                    }
+                    
+                    ctx.restore();
+                }
+            };
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Cumulative Profit/Loss',
+                        data: data,
+                        borderColor: greenColor,
+                        backgroundColor: 'transparent',
+                        fill: false, // We handle fill manually
+                        tension: 0.3,
+                        pointRadius: data.length > 100 ? 0 : 3,
+                        pointHoverRadius: 5,
+                        borderWidth: 2,
+                        // Dynamic segment coloring based on Y value
+                        segment: {
+                            borderColor: function(ctx) {
+                                const yVal = ctx.p1.parsed.y;
+                                const yValPrev = ctx.p0.parsed.y;
+                                if (yVal < 0 && yValPrev < 0) return redColor;
+                                if (yVal >= 0 && yValPrev >= 0) return greenColor;
+                                return yVal >= 0 ? greenColor : redColor;
+                            }
+                        },
+                        pointBackgroundColor: function(context) {
+                            const value = context.parsed?.y;
+                            if (value === undefined) return greenColor;
+                            return value >= 0 ? greenColor : redColor;
+                        },
+                        pointBorderColor: function(context) {
+                            const value = context.parsed?.y;
+                            if (value === undefined) return greenColor;
+                            return value >= 0 ? greenColor : redColor;
+                        }
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: '#21262d',
+                            titleColor: '#e6edf3',
+                            bodyColor: '#e6edf3',
+                            borderColor: '#30363d',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return formatCurrency(context.parsed.y);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(48, 54, 61, 0.5)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#8b949e',
+                                maxTicksLimit: 10,
+                                maxRotation: 0
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(48, 54, 61, 0.5)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#8b949e',
+                                callback: function(value) {
+                                    return formatCurrency(value);
+                                }
+                            }
+                        }
+                    }
+                },
+                plugins: [customFillPlugin]
+            });
+        }
+
+        // Update table
+        function updateTable() {
+            const tbody = document.getElementById('sessionTableBody');
+            const totalPages = Math.ceil(filteredSessions.length / ROWS_PER_PAGE);
+            const start = (currentPage - 1) * ROWS_PER_PAGE;
+            const end = start + ROWS_PER_PAGE;
+            const pageSessions = filteredSessions.slice(start, end);
+
+            tbody.innerHTML = pageSessions.map(s => `
+                <tr>
+                    <td>${formatDate(s.date)}</td>
+                    <td><span class="type-badge ${s.type.toLowerCase()}">${s.type}</span></td>
+                    <td>${s.subtype || '—'}</td>
+                    <td>${s.game}</td>
+                    <td>${s.liveOnline}</td>
+                    <td class="money">${formatCurrency(s.inFor)}</td>
+                    <td class="money">${formatCurrency(s.outFor)}</td>
+                    <td class="money ${s.net >= 0 ? 'positive' : 'negative'}">${formatCurrency(s.net)}</td>
+                    <td class="notes" title="${s.notes}">${s.notes || ''}</td>
+                </tr>
+            `).join('');
+
+            // Update pagination
+            document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages || 1}`;
+            document.getElementById('prevPage').disabled = currentPage <= 1;
+            document.getElementById('nextPage').disabled = currentPage >= totalPages;
+
+            // Update table info
+            document.getElementById('tableInfo').textContent = `Showing ${filteredSessions.length.toLocaleString()} sessions`;
+
+            // Update sort indicators
+            document.querySelectorAll('th[data-sort]').forEach(th => {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+                if (th.dataset.sort === sortColumn) {
+                    th.classList.add(sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
+                }
+            });
+        }
+
+        // Update breakdown table
+        function updateBreakdown() {
+            const groupBy = document.getElementById('breakdownBy').value;
+            const tbody = document.getElementById('breakdownTableBody');
+            
+            // Group sessions by selected dimension
+            const groups = {};
+            filteredSessions.forEach(s => {
+                let key;
+                switch (groupBy) {
+                    case 'game': key = s.game || '(empty)'; break;
+                    case 'type': key = s.type || '(empty)'; break;
+                    case 'subtype': key = s.subtype || '(empty)'; break;
+                    case 'liveOnline': key = s.liveOnline || '(empty)'; break;
+                }
+                
+                if (!groups[key]) {
+                    groups[key] = { sessions: 0, buyins: 0, cashouts: 0, wins: 0 };
+                }
+                groups[key].sessions++;
+                groups[key].buyins += s.inFor;
+                groups[key].cashouts += s.outFor;
+                if (s.net > 0) groups[key].wins++;
+            });
+            
+            // Convert to array and calculate derived metrics
+            let breakdownData = Object.entries(groups).map(([name, data]) => ({
+                name,
+                sessions: data.sessions,
+                buyins: data.buyins,
+                cashouts: data.cashouts,
+                net: data.cashouts - data.buyins,
+                roi: data.buyins > 0 ? ((data.cashouts - data.buyins) / data.buyins) * 100 : 0,
+                winrate: data.sessions > 0 ? (data.wins / data.sessions) * 100 : 0
+            }));
+            
+            // Sort
+            breakdownData.sort((a, b) => {
+                let aVal = a[breakdownSortColumn];
+                let bVal = b[breakdownSortColumn];
+                
+                if (typeof aVal === 'string') {
+                    aVal = aVal.toLowerCase();
+                    bVal = bVal.toLowerCase();
+                }
+                
+                if (aVal < bVal) return breakdownSortDirection === 'asc' ? -1 : 1;
+                if (aVal > bVal) return breakdownSortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+            
+            // Render
+            tbody.innerHTML = breakdownData.map(row => `
+                <tr>
+                    <td>${row.name}</td>
+                    <td>${row.sessions.toLocaleString()}</td>
+                    <td class="money">${formatCurrency(row.buyins)}</td>
+                    <td class="money">${formatCurrency(row.cashouts)}</td>
+                    <td class="money ${row.net >= 0 ? 'positive' : 'negative'}">${formatCurrency(row.net)}</td>
+                    <td class="${row.roi >= 0 ? 'positive' : 'negative'}">${row.roi >= 0 ? '+' : ''}${row.roi.toFixed(1)}%</td>
+                    <td>${row.winrate.toFixed(1)}%</td>
+                </tr>
+            `).join('');
+            
+            // Update sort indicators for breakdown table
+            document.querySelectorAll('th[data-breakdown-sort]').forEach(th => {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+                if (th.dataset.breakdownSort === breakdownSortColumn) {
+                    th.classList.add(breakdownSortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
+                }
+            });
+        }
+
+        // Event Listeners
+        function setupEventListeners() {
+            // Filter changes
+            ['dateFrom', 'dateTo', 'typeFilter', 'subtypeFilter', 'gameFilter', 'liveOnlineFilter'].forEach(id => {
+                document.getElementById(id).addEventListener('change', applyFilters);
+            });
+
+            // Reset filters - clears all filters to show all data
+            document.getElementById('resetFilters').addEventListener('click', () => {
+                if (allSessions.length > 0) {
+                    const dates = allSessions.map(s => s.date).sort((a, b) => a - b);
+                    const today = new Date();
+                    document.getElementById('dateFrom').value = formatDateForInput(dates[0]);
+                    document.getElementById('dateTo').value = formatDateForInput(today);
+                }
+                document.getElementById('typeFilter').value = 'all';
+                document.getElementById('subtypeFilter').value = 'all';
+                document.getElementById('gameFilter').value = 'all';
+                document.getElementById('liveOnlineFilter').value = 'all';
+                clearActiveDateShortcut();
+                applyFilters();
+            });
+
+            // Date shortcuts
+            function clearActiveDateShortcut() {
+                document.querySelectorAll('.date-shortcut').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+            }
+
+            function setDateRange(fromDate, toDate, button) {
+                document.getElementById('dateFrom').value = formatDateForInput(fromDate);
+                document.getElementById('dateTo').value = formatDateForInput(toDate);
+                clearActiveDateShortcut();
+                if (button) button.classList.add('active');
+                applyFilters();
+            }
+
+            document.querySelectorAll('.date-shortcut').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const range = btn.dataset.range;
+                    const today = new Date();
+                    let fromDate, toDate;
+
+                    switch (range) {
+                        case 'ytd':
+                            fromDate = new Date(today.getFullYear(), 0, 1);
+                            toDate = today;
+                            break;
+                        case 'last-year':
+                            fromDate = new Date(today.getFullYear() - 1, 0, 1);
+                            toDate = new Date(today.getFullYear() - 1, 11, 31);
+                            break;
+                        case 'this-month':
+                            fromDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                            toDate = today;
+                            break;
+                        case 'last-month':
+                            fromDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                            toDate = new Date(today.getFullYear(), today.getMonth(), 0);
+                            break;
+                        case 'last-30':
+                            fromDate = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+                            toDate = today;
+                            break;
+                        case 'last-90':
+                            fromDate = new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000);
+                            toDate = today;
+                            break;
+                        case 'all-time':
+                            const dates = allSessions.map(s => s.date).sort((a, b) => a - b);
+                            fromDate = dates[0];
+                            toDate = today;
+                            break;
+                    }
+
+                    setDateRange(fromDate, toDate, btn);
+                });
+            });
+
+            // Clear active shortcut when manually changing dates
+            document.getElementById('dateFrom').addEventListener('change', clearActiveDateShortcut);
+            document.getElementById('dateTo').addEventListener('change', clearActiveDateShortcut);
+
+            // Chart toggle
+            document.getElementById('btnBySession').addEventListener('click', () => {
+                chartMode = 'session';
+                document.getElementById('btnBySession').classList.add('active');
+                document.getElementById('btnByDate').classList.remove('active');
+                updateChart();
+            });
+
+            document.getElementById('btnByDate').addEventListener('click', () => {
+                chartMode = 'date';
+                document.getElementById('btnByDate').classList.add('active');
+                document.getElementById('btnBySession').classList.remove('active');
+                updateChart();
+            });
+
+            // Table sorting
+            document.querySelectorAll('th[data-sort]').forEach(th => {
+                th.addEventListener('click', () => {
+                    const column = th.dataset.sort;
+                    if (sortColumn === column) {
+                        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        sortColumn = column;
+                        sortDirection = column === 'date' ? 'desc' : 'asc';
+                    }
+                    sortSessions();
+                    updateTable();
+                });
+            });
+
+            // Pagination
+            document.getElementById('prevPage').addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    updateTable();
+                }
+            });
+
+            document.getElementById('nextPage').addEventListener('click', () => {
+                const totalPages = Math.ceil(filteredSessions.length / ROWS_PER_PAGE);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    updateTable();
+                }
+            });
+
+            // Breakdown functionality
+            document.getElementById('breakdownBy').addEventListener('change', updateBreakdown);
+
+            document.querySelectorAll('th[data-breakdown-sort]').forEach(th => {
+                th.addEventListener('click', () => {
+                    const column = th.dataset.breakdownSort;
+                    if (breakdownSortColumn === column) {
+                        breakdownSortDirection = breakdownSortDirection === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        breakdownSortColumn = column;
+                        breakdownSortDirection = column === 'name' ? 'asc' : 'desc';
+                    }
+                    updateBreakdown();
+                });
+            });
+        }
+
+        // Initialize
+        async function init() {
+            try {
+                const response = await fetch(SHEET_URL);
+                if (!response.ok) throw new Error('Failed to fetch data');
+                
+                const csv = await response.text();
+                allSessions = parseCSV(csv);
+
+                if (allSessions.length === 0) {
+                    throw new Error('No session data found');
+                }
+
+                populateFilters();
+                setupEventListeners();
+                applyFilters();
+
+                loadingEl.style.display = 'none';
+                contentEl.style.display = 'block';
+
+            } catch (err) {
+                console.error(err);
+                loadingEl.style.display = 'none';
+                errorEl.style.display = 'block';
+                errorEl.textContent = `Error loading data: ${err.message}. Please check that the Google Sheet is published and accessible.`;
+            }
+        }
+
+        // Start - only auto-init if already authenticated
+        if (isAuthenticated) {
+            init();
+        }
+    </script>
+</body>
+</html>
