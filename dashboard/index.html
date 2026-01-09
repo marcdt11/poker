@@ -1274,7 +1274,6 @@
                     const dataset = chart.data.datasets[0];
                     const meta = chart.getDatasetMeta(0);
                     const yScale = chart.scales.y;
-                    const xScale = chart.scales.x;
                     const chartArea = chart.chartArea;
                     
                     if (!chartArea || !meta.data || meta.data.length < 2) return;
@@ -1347,7 +1346,7 @@
                         borderColor: greenColor,
                         backgroundColor: 'transparent',
                         fill: false, // We handle fill manually
-                        tension: 0.3,
+                        tension: 0,
                         pointRadius: data.length > 100 ? 0 : 3,
                         pointHoverRadius: 5,
                         borderWidth: 2,
