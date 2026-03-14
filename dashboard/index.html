@@ -1334,6 +1334,64 @@
             );
         }
 
+        // Get sessions filtered by date range only
+        function getDateFilteredSessions() {
+            const dateFrom = parseDateInput(document.getElementById('dateFrom').value);
+            const dateTo = parseDateInput(document.getElementById('dateTo').value);
+            return allSessions.filter(s => {
+                if (dateFrom && s.date < dateFrom) return false;
+                if (dateTo) {
+                    const endOfDay = new Date(dateTo);
+                    endOfDay.setHours(23, 59, 59, 999);
+                    if (s.date > endOfDay) return false;
+                }
+                return true;
+            });
+        }
+
+        // Filter sessions by all multiselects EXCEPT the one named by excludeKey
+        function filterExcluding(sessions, filters, excludeKey) {
+            return sessions.filter(s => {
+                for (const [key, val] of Object.entries(filters)) {
+                    if (key === excludeKey) continue;
+                    if (val !== 'all' && !val.includes(s[key])) return false;
+                }
+                return true;
+            });
+        }
+
+        // Update which options are visible in each multiselect based on other filters
+        function updateAvailableOptions() {
+            const dateSessions = getDateFilteredSessions();
+            const filterMap = {
+                type: getMultiselectValues('typeFilter'),
+                subtype: getMultiselectValues('subtypeFilter'),
+                game: getMultiselectValues('gameFilter'),
+                liveOnline: getMultiselectValues('liveOnlineFilter')
+            };
+            const idToKey = {
+                typeFilter: 'type',
+                subtypeFilter: 'subtype',
+                gameFilter: 'game',
+                liveOnlineFilter: 'liveOnline'
+            };
+
+            for (const [id, key] of Object.entries(idToKey)) {
+                const available = new Set(
+                    filterExcluding(dateSessions, filterMap, key).map(s => s[key]).filter(v => v)
+                );
+                const container = document.getElementById(id);
+                container.querySelectorAll('.multiselect-option').forEach(opt => {
+                    const cb = opt.querySelector('input[type="checkbox"]');
+                    if (available.has(cb.value)) {
+                        opt.style.display = '';
+                    } else {
+                        opt.style.display = 'none';
+                    }
+                });
+            }
+        }
+
         // Apply filters
         function applyFilters() {
             const dateFrom = parseDateInput(document.getElementById('dateFrom').value);
@@ -1356,6 +1414,8 @@
                 if (liveOnline !== 'all' && !liveOnline.includes(s.liveOnline)) return false;
                 return true;
             });
+
+            updateAvailableOptions();
 
             currentPage = 1;
             sortSessions();
