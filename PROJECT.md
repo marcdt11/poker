@@ -1,12 +1,14 @@
-# RTP Driller — Project Overview
+# Poker Tools — Project Overview
 
 ## What It Is
-A web-based poker scenario drilling tool for NLHE study groups. Automates card dealing and opponent actions so players can focus on articulating their thought process (Repeatable Thought Process) street-by-street.
+A collection of web-based poker tools hosted at `poker.marctorrence.com`. Currently two apps:
+1. **Dashboard** — Analytics dashboard that pulls session data from a Google Sheet and displays stats, charts, and filterable session history.
+2. **RTP Driller** — Scenario drilling tool for NLHE study groups. Automates card dealing and opponent actions so players can focus on articulating their thought process street-by-street.
 
 ## Architecture
 - **No build tools, no frameworks.** Vanilla HTML/CSS/JS, static files served by GitHub Pages.
-- **Single-file apps.** Each tool (dashboard, driller) is a self-contained `index.html`.
-- **Client-side only.** No backend, no database. Session state lives in JS memory.
+- **Single-file apps.** Each tool is a self-contained `index.html`.
+- **Client-side only.** No backend, no database. Dashboard reads from a published Google Sheet CSV; Driller state lives in JS memory.
 
 ## Folder Structure
 ```
@@ -14,12 +16,45 @@ A web-based poker scenario drilling tool for NLHE study groups. Automates card d
 ├── CLAUDE.md              # CTO instructions (Claude-only)
 ├── PROJECT.md             # This file
 ├── BACKLOG.md             # Feature backlog + completed items
+├── CNAME                  # Custom domain config
 ├── index.html             # Landing page → links to /dashboard/ and /driller/
 ├── dashboard/
-│   └── index.html         # Analytics dashboard (Google Sheets integration)
+│   └── index.html         # Analytics dashboard
 └── driller/
-    └── index.html         # RTP Driller app (scenario generator)
+    └── index.html         # RTP Driller app
 ```
+
+## Deployment
+- GitHub Pages from `main` branch, root `/` path
+- Repo: `marcdt11/poker`
+- Custom domain: `poker.marctorrence.com`
+- No CI/CD — push to main auto-deploys
+
+---
+
+## Dashboard — Technical Details
+
+### Data Source
+- Published Google Sheet CSV fetched client-side
+- CORS proxy fallback chain (allorigins → corsproxy.io → api.codetabs.com) for reliable cross-origin fetching
+- Cache-busting query param appended to each request
+
+### Authentication
+- Simple password gate stored in `sessionStorage` (password hardcoded in source — not secure, just a casual gate)
+
+### Features
+- **KPI Cards** — Total profit, hourly rate, session count, win rate, avg session hours, best/worst session
+- **Cumulative Profit Chart** — Chart.js line chart with toggle between cumulative profit and hourly rate views
+- **Filters** — Multiselect dropdowns for location, stakes, game type + date range inputs. Dropdowns show only options available given other active filters. Select all/none controls.
+- **Session Table** — Paginated (25 rows), sortable, showing date, location, game, stakes, hours, buy-in, cash-out, profit
+- **Responsive** — Mobile-friendly layout
+
+### Design System
+- Dark GitHub-style theme (`--bg-primary: #0d1117`)
+- Fonts: Outfit (UI) + JetBrains Mono (numbers)
+- Green/red profit coloring
+
+---
 
 ## Driller — Technical Details
 
@@ -63,12 +98,8 @@ CSS custom properties matching PreflopTrainer's visual style:
 - Limp locks position to IP
 - Default: IP, SRP, 200bb, $1/$3
 
-## Deployment
-- GitHub Pages from `main` branch, root `/` path
-- Repo: `marcdt11/poker`
-- Custom domain: `poker.marctorrence.com`
-- No CI/CD — push to main auto-deploys
-
 ## Known Issues
-- Pot rounding: 10.5bb × $3 = $31.50 rounds to $32 (only affects SRP initial pot from 0.5bb dead SB)
-- Sidebar post-flop section shows only current street title — actions from all streets appear without grouping by street
+- **Driller**: Pot rounding — 10.5bb × $3 = $31.50 rounds to $32 (only affects SRP initial pot from 0.5bb dead SB)
+- **Driller**: Sidebar post-flop section shows only current street title — actions from all streets appear without grouping by street
+- **Dashboard**: Password hardcoded in source (not a real security measure)
+- **Dashboard**: Relies on third-party CORS proxies which may go down; fallback chain mitigates but doesn't eliminate risk
