@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "poker-dashboard",
+      "runtimeExecutable": "/usr/bin/ruby",
+      "runtimeArgs": ["/Users/marctorrence/Documents/ClaudeCode/poker/serve.rb"],
+      "port": 8080
+    }
+  ]
+}
