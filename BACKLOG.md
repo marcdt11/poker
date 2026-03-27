@@ -64,6 +64,8 @@ _(none known)_
 - [ ] Hand export (copy to clipboard as text)
 - [ ] Voice/text notes per street for thought process recording
 - [ ] Quick-sizing buttons (1/3 pot, 1/2 pot, 2/3 pot, pot, overbet)
+- [ ] Shot clock — optional per-action countdown timer (e.g. 15s, 30s, 60s) to practice time pressure; visual only, does not auto-fold
+- [ ] Villain player types — assign profiles (e.g. tight/passive, loose/aggressive, calling station) that change opponent betting/calling behavior
 
 ### Bugs
 - [ ] SRP initial pot displays $32 instead of $31.50 due to rounding (0.5bb dead SB × $3)
