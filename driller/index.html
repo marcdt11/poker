@@ -964,14 +964,14 @@
                 font-size: 8px;
             }
             .table-hole-card {
-                width: 32px;
-                height: 44px;
+                width: 40px;
+                height: 56px;
             }
             .table-hole-card .rank {
                 font-size: 20px;
             }
             .table-hole-card .suit {
-                font-size: 20px;
+                font-size: 15px;
             }
             .card.board-card {
                 width: 40px;
@@ -987,23 +987,40 @@
                 width: 40px;
                 height: 56px;
             }
-            /* Mobile: tuck seat cards behind circle, poking out above */
-            .seat-cards {
+            /* Mobile: tuck non-hero seat cards behind circle, poking out above */
+            .seat:not(.hero) .seat-cards {
                 left: 50% !important;
                 right: auto !important;
-                top: -8px !important;
+                top: -12px !important;
                 transform: translateX(-50%) !important;
                 gap: 2px;
+                z-index: 0;
+            }
+            /* Cover cards with seat background so they appear behind the circle */
+            .seat:not(.hero)::after {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: inherit;
+                border-radius: 50%;
                 z-index: 1;
             }
-            .table-hole-card {
+            .seat:not(.hero) .seat-position,
+            .seat:not(.hero) .seat-stack,
+            .seat:not(.hero) .seat-hero-label,
+            .seat:not(.hero) .dealer-badge,
+            .seat:not(.hero) .seat-bet-pill {
+                z-index: 2;
+                position: relative;
+            }
+            .seat:not(.hero) .table-hole-card {
                 width: 20px;
                 height: 28px;
             }
-            .table-hole-card .rank {
+            .seat:not(.hero) .table-hole-card .rank {
                 font-size: 0;
             }
-            .table-hole-card .suit {
+            .seat:not(.hero) .table-hole-card .suit {
                 font-size: 0;
             }
             /* Fold animation: shrink into center and disappear */
@@ -1011,7 +1028,7 @@
                 0%   { transform: translateX(-50%) scale(1); opacity: 1; }
                 100% { transform: translateX(-50%) translateY(20px) scale(0); opacity: 0; }
             }
-            .seat-cards.folding {
+            .seat:not(.hero) .seat-cards.folding {
                 animation: foldCardsMobile 0.38s ease-in forwards !important;
             }
             .seat-pos-0 .seat-bet-pill { top: -38px; }
