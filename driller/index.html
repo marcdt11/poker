@@ -275,22 +275,28 @@
             border-color: rgba(255,255,255,0.28);
         }
 
+        .seat.folded.btn-seat {
+            opacity: 1;
+        }
+
+
         .seat-position {
             font-weight: 700;
-            color: rgba(255,255,255,0.7);
-            font-size: 11px;
+            color: rgba(255,255,255,0.85);
+            font-size: 10px;
             line-height: 1;
-            position: absolute;
-            top: -17px;
-            left: 50%;
-            transform: translateX(-50%);
             white-space: nowrap;
+        }
+
+        .seat.folded .seat-position,
+        .seat.folded .seat-stack {
+            display: none;
         }
 
         .seat-stack {
             font-weight: 700;
-            font-size: 14px;
-            color: #fff;
+            font-size: 11px;
+            color: rgba(255,255,255,0.6);
             line-height: 1;
         }
 
@@ -331,15 +337,15 @@
             box-shadow: 0 1px 4px rgba(0,0,0,0.4);
             z-index: 4;
         }
-        /* Dealer badge positioned toward table center for each seat */
-        .seat-pos-0 .dealer-badge { top: -18px; left: 50%; right: auto; transform: translateX(-50%); }
-        .seat-pos-1 .dealer-badge { top: -10px; right: -7px; }
-        .seat-pos-2 .dealer-badge { top: 50%; right: -18px; left: auto; transform: translateY(-50%); }
-        .seat-pos-3 .dealer-badge { bottom: -10px; right: -7px; top: auto; }
-        .seat-pos-4 .dealer-badge { bottom: -18px; left: 50%; top: auto; right: auto; transform: translateX(-50%); }
-        .seat-pos-5 .dealer-badge { bottom: -10px; left: -7px; top: auto; right: auto; }
-        .seat-pos-6 .dealer-badge { top: 50%; left: -18px; right: auto; transform: translateY(-50%); }
-        .seat-pos-7 .dealer-badge { top: -10px; left: -7px; right: auto; }
+        /* Dealer badge positioned toward table center, same distance as bet pills */
+        .seat-pos-0 .dealer-badge { top: -38px; left: 50%; right: auto; transform: translateX(-50%); }
+        .seat-pos-1 .dealer-badge { top: -24px; right: -20px; }
+        .seat-pos-2 .dealer-badge { top: 50%; right: -50px; left: auto; transform: translateY(-50%); }
+        .seat-pos-3 .dealer-badge { bottom: -24px; right: -20px; top: auto; }
+        .seat-pos-4 .dealer-badge { bottom: -38px; left: 50%; top: auto; right: auto; transform: translateX(-50%); }
+        .seat-pos-5 .dealer-badge { bottom: -24px; left: -20px; top: auto; right: auto; }
+        .seat-pos-6 .dealer-badge { top: 50%; left: -50px; right: auto; transform: translateY(-50%); }
+        .seat-pos-7 .dealer-badge { top: -24px; left: -20px; right: auto; }
 
         .seat {
             transform: translate(-50%, -50%);
@@ -387,7 +393,7 @@
         }
 
         .card .rank { font-size: 24px; }
-        .card .suit { font-size: 18px; margin-top: 1px; }
+        .card .suit { font-size: 24px; }
 
         .card.red { color: #d32f2f; }
         .card.black { color: #1a1a1a; }
@@ -399,7 +405,7 @@
         }
 
         .card.board-card .rank { font-size: 16px; }
-        .card.board-card .suit { font-size: 12px; }
+        .card.board-card .suit { font-size: 16px; }
 
         @keyframes cardDeal {
             from { opacity: 0; transform: scale(0.5) translateY(-20px); }
@@ -852,8 +858,7 @@
         }
 
         .table-hole-card .suit {
-            font-size: 15px;
-            margin-top: 2px;
+            font-size: 22px;
         }
 
         .card.board-card {
@@ -864,7 +869,7 @@
         }
 
         .card.board-card .rank { font-size: 22px; }
-        .card.board-card .suit { font-size: 15px; margin-top: 2px; }
+        .card.board-card .suit { font-size: 22px; }
 
         .card.board-card.facedown {
             width: 34px;
@@ -962,7 +967,7 @@
                 font-size: 20px;
             }
             .table-hole-card .suit {
-                font-size: 14px;
+                font-size: 20px;
             }
             .card.board-card {
                 width: 32px;
@@ -972,7 +977,7 @@
                 font-size: 20px;
             }
             .card.board-card .suit {
-                font-size: 14px;
+                font-size: 20px;
             }
             .card.board-card.facedown {
                 width: 32px;
@@ -998,11 +1003,10 @@
                 height: 64px;
             }
             .seat-stack {
-                font-size: 16px;
+                font-size: 13px;
             }
             .seat-position {
                 font-size: 12px;
-                top: -18px;
             }
             .seat-hero-label {
                 bottom: -24px;
@@ -1016,7 +1020,7 @@
                 font-size: 24px;
             }
             .table-hole-card .suit {
-                font-size: 16px;
+                font-size: 24px;
             }
             .card { width: 48px; height: 68px; font-size: 24px; }
             .card .rank { font-size: 24px; }
@@ -1025,7 +1029,7 @@
                 height: 54px;
             }
             .card.board-card .rank { font-size: 24px; }
-            .card.board-card .suit { font-size: 16px; }
+            .card.board-card .suit { font-size: 24px; }
             .card.board-card.facedown {
                 width: 38px;
                 height: 54px;
@@ -1604,6 +1608,7 @@
         await delay(300);
         game.seatBets = {};
         game.pot = spot.pot;
+        game.displayPot = spot.pot;
         renderPotPill();
         renderTableSeats();
 
@@ -1624,8 +1629,8 @@
 
     function renderPotPill() {
         const potPill = document.getElementById('potPill');
-        if (game.pot > 0) {
-            potPill.textContent = fmtDollar(game.pot);
+        if (game.displayPot > 0) {
+            potPill.textContent = fmtDollar(game.displayPot);
             potPill.classList.add('visible');
         } else {
             potPill.classList.remove('visible');
@@ -1653,6 +1658,7 @@
             streetActions: [],
             userFolded: false,
             allIn: false,
+            displayPot: 0,
             pendingAction: null,
             renderedBoardCount: 0,
             preflopAnimating: true,
@@ -1863,8 +1869,9 @@
     }
 
     function collectBetsIntoPot() {
-        // Clear seat bets and update pot pill
+        // Clear seat bets, sync display pot, and update pot pill
         game.seatBets = {};
+        game.displayPot = game.pot;
         renderPotPill();
         renderTableSeats();
     }
@@ -2001,6 +2008,7 @@
                 type = 'active-player';
             }
 
+
             let stackStr = '';
             if (isHero) stackStr = fmtDollar(game.userStack);
             else if (isVillain) stackStr = fmtDollar(game.oppStack);
@@ -2039,8 +2047,11 @@
             else if (seatState === 'posted') statusClass = ' status-posted';
 
             const isSeatFolded = isFolded && !isHero && !isVillain;
-            seatEl.className = 'seat seat-pos-' + visualIndex + ' ' + (isSeatFolded ? 'folded' : type) + statusClass + activeClass;
-            seatEl.innerHTML = `${dealerBadge}${heroLabel}<div class="seat-position">${position}</div>${stackStr ? '<div class="seat-stack">' + stackStr + '</div>' : ''}${pillHtml}`;
+            const isBTN = position === 'BTN';
+            seatEl.className = 'seat seat-pos-' + visualIndex + ' ' + (isSeatFolded ? 'folded' : type) + (isBTN ? ' btn-seat' : '') + statusClass + activeClass;
+            const posLabel = isSeatFolded ? '' : `<div class="seat-position">${position}</div>`;
+            const stackLabel = stackStr && !isSeatFolded ? `<div class="seat-stack">${stackStr}</div>` : '';
+            seatEl.innerHTML = `${dealerBadge}${heroLabel}${posLabel}${stackLabel}${pillHtml}`;
 
             let cardsHTML = '';
             if (isSeatFolded) {
@@ -2081,10 +2092,10 @@
         document.getElementById('boardCards').innerHTML = boardHTML.join('');
         game.renderedBoardCount = game.board.length;
 
-        // Pot pill
+        // Pot pill — only shows collected pot, not in-flight bets
         const potPill = document.getElementById('potPill');
-        potPill.textContent = fmtDollar(game.pot);
-        if (game.pot > 0) potPill.classList.add('visible');
+        potPill.textContent = fmtDollar(game.displayPot);
+        if (game.displayPot > 0) potPill.classList.add('visible');
 
         // Hero hole cards — only render once to avoid re-triggering animations
         const heroHandEl = document.getElementById('heroHand');
