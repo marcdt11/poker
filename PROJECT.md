@@ -72,9 +72,9 @@ CSS custom properties matching PreflopTrainer's visual style:
 - Loaded via Google Fonts CDN
 
 ### Core Modules (all in `driller/index.html`)
-- **Deck Engine** — Fisher-Yates shuffle, deal with burn cards, no duplicates
+- **Deck Engine** — Fisher-Yates shuffle, deal with burn cards, no duplicates. Hero hole cards dealt from preflop raising ranges (embedded per spot from PreflopTrainer data)
 - **Game State Machine** — street progression (flop→turn→river→showdown), pot/stack tracking, action log
-- **Preflop Spot Definitions** — 7 preflop configs with fixed pot sizes, positions, and narratives
+- **Preflop Spot Definitions** — 7 preflop configs with fixed pot sizes, positions, narratives, and raising ranges
 - **Opponent Logic** — position-aware: when H is IP, V always checks then calls; when H is OOP and checks, V checks/bets 1/3 pot/bets 2/3 pot (equal 33% weight); when H is OOP and bets, V always calls
 - **Config UI** — stack depth, spot type, position, stakes with mutual exclusion rules
 - **Table UI** — 8-max stadium-shaped felt (responsive: vertical on mobile, horizontal on desktop) with positioned seats, hero hand below table, white glow active-turn indicators, status-colored seat borders

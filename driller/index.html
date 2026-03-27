@@ -1257,7 +1257,18 @@
         10: { bb: 10, sb: 5, label: '$5/$10' },
     };
 
-    // Preflop action steps for sidebar (per spot)
+    // Hero preflop ranges (hands containing "raise" action)
+    const RANGES = {
+        'SRP_IP': ['44','55','66','77','88','99','AA','AKs','AQs','AJs','ATs','A9s','A8s','A7s','A6s','A5s','A4s','A3s','A2s','AKo','KK','KQs','KJs','KTs','K9s','K8s','K7s','AQo','KQo','QQ','QJs','QTs','Q9s','Q8s','AJo','KJo','JJ','JTs','J9s','J8s','ATo','TT','T9s','T8s','98s','87s','76s','65s','54s'],
+        'SRP_OOP': ['22','33','44','55','66','77','88','99','AA','AKs','AQs','AJs','ATs','A9s','A8s','A7s','A6s','A5s','A4s','A3s','A2s','AKo','KK','KQs','KJs','KTs','K9s','K8s','K7s','K6s','K5s','K4s','K3s','K2s','AQo','KQo','QQ','QJs','QTs','Q9s','Q8s','Q7s','AJo','KJo','QJo','JJ','JTs','J9s','J8s','J7s','ATo','KTo','QTo','JTo','TT','T9s','T8s','T7s','98s','97s','87s','76s','65s','54s'],
+        'LIMP_IP': ['88','99','AA','AKs','AQs','AJs','ATs','A5s','AKo','KK','KQs','KJs','KTs','AQo','QQ','QJs','QTs','AJo','JJ','JTs','TT'],
+        '3BP_IP': ['66','77','88','99','AA','AKs','AQs','AJs','ATs','A9s','A5s','A4s','AKo','KK','KQs','KJs','KTs','AQo','QQ','QJs','QTs','JJ','JTs','TT','T9s','76s','65s','54s'],
+        '3BP_OOP': ['88','99','AA','AKs','AQs','AJs','ATs','A9s','A5s','A4s','AKo','KK','KQs','KJs','KTs','AQo','QQ','QJs','QTs','JJ','JTs','TT','T9s','65s','54s'],
+        '4BP_IP': ['AA','AKs','A9s','A5s','AKo','KK','KTs','87s'],
+        '4BP_OOP': ['AA','AKs','AQs','AJs','AKo','KK','KQs','AQo','QQ','QJs','JJ','TT'],
+    };
+
+    // Preflop action steps (per spot)
     const PREFLOP_STEPS = {
         'LIMP_IP': [
             { who: 'fold', seats: ['UTG', 'UTG1'], dimmed: true },
@@ -1334,6 +1345,66 @@
             [a[i], a[j]] = [a[j], a[i]];
         }
         return a;
+    }
+
+    // Deal hero hole cards from the spot's preflop range
+    function dealFromRange(spotKey, deck) {
+        const range = RANGES[spotKey];
+        // Weight by combo count: pairs=6, suited=4, offsuit=12
+        const weights = range.map(h => h.length === 2 ? 6 : h[2] === 's' ? 4 : 12);
+        const totalWeight = weights.reduce((a, b) => a + b, 0);
+        let roll = Math.random() * totalWeight;
+        let hand;
+        for (let i = 0; i < range.length; i++) {
+            roll -= weights[i];
+            if (roll <= 0) { hand = range[i]; break; }
+        }
+        if (!hand) hand = range[range.length - 1];
+
+        let rank1, rank2, suited;
+        if (hand.length === 2) {
+            // Pair: e.g. "AA"
+            rank1 = hand[0];
+            rank2 = hand[1];
+            suited = null;
+        } else {
+            // Non-pair: e.g. "AKs" or "AKo"
+            rank1 = hand[0];
+            rank2 = hand[1];
+            suited = hand[2] === 's';
+        }
+
+        // Collect candidate cards from deck
+        const cards1 = deck.filter(c => c.rank === rank1);
+        const cards2 = deck.filter(c => c.rank === rank2);
+
+        let c1, c2;
+        if (rank1 === rank2) {
+            // Pair — pick two random cards of that rank
+            const shuffled = shuffle(cards1);
+            c1 = shuffled[0];
+            c2 = shuffled[1];
+        } else if (suited) {
+            // Suited — pick a random suit, then find both ranks in that suit
+            const availableSuits = SUITS.filter(s =>
+                cards1.some(c => c.suit === s) && cards2.some(c => c.suit === s)
+            );
+            const suit = availableSuits[Math.floor(Math.random() * availableSuits.length)];
+            c1 = cards1.find(c => c.suit === suit);
+            c2 = cards2.find(c => c.suit === suit);
+        } else {
+            // Offsuit — pick two different suits
+            const s1 = shuffle(cards1);
+            c1 = s1[0];
+            const offsuit2 = cards2.filter(c => c.suit !== c1.suit);
+            c2 = offsuit2[Math.floor(Math.random() * offsuit2.length)];
+        }
+
+        // Remove chosen cards from deck
+        deck.splice(deck.indexOf(c1), 1);
+        deck.splice(deck.indexOf(c2), 1);
+
+        return [c1, c2];
     }
 
     // ===== PREFLOP ANIMATION =====
@@ -1572,7 +1643,7 @@
             spot,
             spotKey,
             deck,
-            holeCards: [deck.pop(), deck.pop()],
+            holeCards: dealFromRange(spotKey, deck),
             board: [],
             streetIndex: 0,
             pot: 0,

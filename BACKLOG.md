@@ -32,6 +32,7 @@ _(none known)_
 
 ### Completed
 - [x] Core deck engine with shuffle and burn cards
+- [x] Range-based hero dealing (preflop raising ranges from PreflopTrainer, per spot)
 - [x] Game state machine (street progression, pot/stack tracking)
 - [x] 7 preflop spot definitions with correct pot math
 - [x] Config screen with mutual exclusion (4BP/100bb, Limp/IP lock)
