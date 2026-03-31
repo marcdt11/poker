@@ -57,15 +57,13 @@
             max-width: 1600px;
             margin: 0 auto;
             padding: 16px;
-            min-height: 100vh;
-            min-height: 100dvh;
+            height: 100vh;
+            height: 100dvh;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
 
-        .config-inner, .summary-inner {
-            max-width: none;
-        }
 
         .header {
             display: flex;
@@ -100,44 +98,102 @@
 
         .btn-icon:hover { border-color: rgba(255,255,255,0.4); }
 
-        /* ===== SCREENS ===== */
-        .screen { display: none; flex-direction: column; flex: 1; }
-        .screen.active { display: flex; }
+        /* ===== MAIN LAYOUT ===== */
+        .main-layout {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+        }
 
-        /* ===== CONFIG SCREEN ===== */
+        /* ===== CONFIG PANEL ===== */
+        .config-panel {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .config-body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .config-strip-summary {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            letter-spacing: 0.03em;
+        }
+
+        .config-strip-summary span {
+            font-family: var(--font-mono);
+        }
+
+        .config-toggle-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            transition: transform 0.2s;
+        }
+
+        .config-panel.collapsed .config-toggle-btn {
+            transform: rotate(-90deg);
+        }
+
+        .config-panel.collapsed .config-body {
+            display: none;
+        }
+
         .config-group {
-            margin-bottom: 20px;
+            margin-bottom: 16px;
+        }
+
+        .config-group:last-child {
+            margin-bottom: 0;
         }
 
         .config-label {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 600;
             color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .config-options {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             flex-wrap: wrap;
         }
 
         .config-btn {
-            background: var(--bg-secondary);
+            background: var(--bg-tertiary);
             border: 1px solid rgba(255,255,255,0.15);
             border-radius: var(--radius-md);
             color: var(--text-primary);
-            padding: 10px 18px;
+            padding: 8px 14px;
             cursor: pointer;
             font-family: var(--font-sans);
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             font-weight: 500;
             transition: all 0.15s;
             flex: 1;
-            min-width: 60px;
+            min-width: 50px;
             text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .config-btn:hover:not(.disabled) {
@@ -160,22 +216,37 @@
             cursor: default;
         }
 
-        .deal-btn {
+        /* ===== TABLE AREA ===== */
+        .table-area {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ===== CONTROL BAR ===== */
+        .control-bar {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            padding: 8px 0;
+        }
+
+        .new-hand-btn {
             background: var(--accent-green);
             border: none;
             border-radius: var(--radius-lg);
             color: #fff;
-            padding: 16px;
+            padding: 12px 32px;
             font-family: var(--font-sans);
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 700;
             cursor: pointer;
-            margin-top: auto;
             transition: opacity 0.2s;
-            width: 100%;
         }
 
-        .deal-btn:hover { opacity: 0.9; }
+        .new-hand-btn:hover { opacity: 0.9; }
 
 
         /* ===== HAND SCREEN ===== */
@@ -185,11 +256,13 @@
             gap: 20px;
             flex: 1;
             min-height: 0;
+            overflow: hidden;
         }
 
         .hand-main {
             flex: 1;
             min-width: 0;
+            min-height: 0;
             display: flex;
             flex-direction: column;
             width: 100%;
@@ -200,6 +273,11 @@
             width: 100%;
             padding: 60px 40px;
             margin: 0 auto 16px;
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .table-felt {
@@ -208,6 +286,8 @@
             border-radius: 999px;
             border: 2px solid rgba(255,255,255,0.15);
             aspect-ratio: 2 / 1;
+            width: 100%;
+            max-height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -613,86 +693,21 @@
 
         .sizing-error.visible { display: block; }
 
-        /* ===== SUMMARY SCREEN ===== */
-        .summary-header {
+        /* ===== HAND COMPLETE BANNER ===== */
+        .hand-complete-banner {
             text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .summary-header h2 {
-            font-size: 1.3rem;
-            margin-bottom: 4px;
-        }
-
-        .summary-result {
-            font-family: var(--font-mono);
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-
-        .summary-result.won { color: var(--accent-green); }
-        .summary-result.lost { color: var(--accent-red); }
-
-        .summary-section {
+            padding: 10px 16px;
             background: var(--bg-secondary);
             border: 1px solid rgba(255,255,255,0.1);
-            border-radius: var(--radius-lg);
-            padding: 16px;
-            margin-bottom: 12px;
-        }
-
-        .summary-section h3 {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 10px;
-        }
-
-        .summary-street {
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .summary-street:last-child { border-bottom: none; }
-
-        .summary-street-label {
-            font-weight: 600;
-            font-size: 0.85rem;
-            margin-bottom: 4px;
-        }
-
-        .summary-street-cards {
-            font-family: var(--font-mono);
+            border-radius: var(--radius-md);
+            margin-bottom: 8px;
             font-size: 0.9rem;
-            margin-bottom: 4px;
+            color: var(--text-secondary);
+            font-weight: 500;
         }
 
-        .summary-actions {
-            display: flex;
-            gap: 16px;
-            margin-top: 20px;
-        }
-
-        .summary-actions .deal-btn {
-            margin-top: 0;
-        }
-
-        .btn-secondary {
-            background: var(--bg-secondary);
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: var(--radius-lg);
-            color: var(--text-primary);
-            padding: 16px;
-            font-family: var(--font-sans);
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            flex: 1;
-            transition: border-color 0.2s;
-        }
-
-        .btn-secondary:hover { border-color: rgba(255,255,255,0.4); }
+        .hand-complete-banner.won { color: var(--accent-green); }
+        .hand-complete-banner.lost { color: var(--accent-red); }
 
         /* ===== SESSION LOG ===== */
         .session-overlay {
@@ -1040,8 +1055,61 @@
             .seat-pos-6 .seat-bet-pill { left: -50px; }
         }
 
+        @media (max-width: 767px) {
+            /* Mobile: collapsible strip behavior */
+            .config-panel {
+                padding: 12px;
+            }
+            .config-strip-summary {
+                margin-bottom: 0;
+            }
+            .config-panel:not(.collapsed) .config-strip-summary {
+                margin-bottom: 12px;
+            }
+            .config-group {
+                margin-bottom: 10px;
+            }
+            .config-btn {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+            }
+            .control-bar {
+                padding: 6px 0;
+            }
+            .new-hand-btn {
+                padding: 10px 24px;
+                font-size: 0.9rem;
+                width: 100%;
+            }
+        }
+
         @media (min-width: 768px) {
             .app { padding: 24px; }
+
+            /* Desktop: sidebar layout */
+            .main-layout {
+                flex-direction: row;
+                gap: 20px;
+            }
+            .config-panel {
+                width: 220px;
+                flex-shrink: 0;
+                align-self: flex-start;
+                position: sticky;
+                top: 24px;
+            }
+            /* Hide collapsible strip on desktop — always show full config */
+            .config-strip-summary {
+                display: none !important;
+            }
+            .config-body {
+                display: flex !important;
+            }
+            .table-area {
+                flex: 1;
+                min-width: 0;
+            }
+
             .table-felt {
                 aspect-ratio: 2 / 1;
             }
@@ -1107,111 +1175,93 @@
             </div>
         </div>
 
-        <!-- CONFIG SCREEN -->
-        <div class="screen active" id="screenConfig">
-            <div class="config-inner">
-            <div class="config-group">
-                <div class="config-label">Position</div>
-                <div class="config-options" id="positionOptions">
-                    <button class="config-btn selected" data-value="IP">IP</button>
-                    <button class="config-btn" data-value="OOP">OOP</button>
+        <!-- MAIN LAYOUT: sidebar + table -->
+        <div class="main-layout">
+            <!-- CONFIG SIDEBAR (desktop) / STRIP (mobile) -->
+            <div class="config-panel" id="configPanel">
+                <div class="config-strip-summary" id="configStripSummary" style="display:none;">
+                    <span id="configSummaryText">IP · SRP · 200bb · $2/$5</span>
+                    <button class="config-toggle-btn" id="configToggleBtn">&#9660;</button>
+                </div>
+                <div class="config-body" id="configBody">
+                    <div class="config-group">
+                        <div class="config-label">Position</div>
+                        <div class="config-options" id="positionOptions">
+                            <button class="config-btn selected" data-value="IP">IP</button>
+                            <button class="config-btn" data-value="OOP">OOP</button>
+                        </div>
+                    </div>
+
+                    <div class="config-group">
+                        <div class="config-label">Spot Type</div>
+                        <div class="config-options" id="spotOptions">
+                            <button class="config-btn" data-value="LIMP">Limp</button>
+                            <button class="config-btn selected" data-value="SRP">SRP</button>
+                            <button class="config-btn" data-value="3BP">3BP</button>
+                            <button class="config-btn" data-value="4BP">4BP</button>
+                        </div>
+                    </div>
+
+                    <div class="config-group">
+                        <div class="config-label">Stack Depth</div>
+                        <div class="config-options" id="stackOptions">
+                            <button class="config-btn" data-value="100">100bb</button>
+                            <button class="config-btn selected" data-value="200">200bb</button>
+                            <button class="config-btn" data-value="300">300bb</button>
+                            <button class="config-btn" data-value="400">400bb</button>
+                        </div>
+                    </div>
+
+                    <div class="config-group">
+                        <div class="config-label">Stakes</div>
+                        <div class="config-options" id="stakesOptions">
+                            <button class="config-btn" data-value="3">$1/$3</button>
+                            <button class="config-btn selected" data-value="5">$2/$5</button>
+                            <button class="config-btn" data-value="10">$5/$10</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="config-group">
-                <div class="config-label">Spot Type</div>
-                <div class="config-options" id="spotOptions">
-                    <button class="config-btn" data-value="LIMP">Limp</button>
-                    <button class="config-btn selected" data-value="SRP">SRP</button>
-                    <button class="config-btn" data-value="3BP">3BP</button>
-                    <button class="config-btn" data-value="4BP">4BP</button>
-                </div>
-            </div>
-
-            <div class="config-group">
-                <div class="config-label">Stack Depth</div>
-                <div class="config-options" id="stackOptions">
-                    <button class="config-btn" data-value="100">100bb</button>
-                    <button class="config-btn selected" data-value="200">200bb</button>
-                    <button class="config-btn" data-value="300">300bb</button>
-                    <button class="config-btn" data-value="400">400bb</button>
-                </div>
-            </div>
-
-            <div class="config-group">
-                <div class="config-label">Stakes</div>
-                <div class="config-options" id="stakesOptions">
-                    <button class="config-btn" data-value="3">$1/$3</button>
-                    <button class="config-btn selected" data-value="5">$2/$5</button>
-                    <button class="config-btn" data-value="10">$5/$10</button>
-                </div>
-            </div>
-
-            <button class="deal-btn" id="btnDeal">Deal</button>
-            </div>
-        </div>
-
-        <!-- HAND SCREEN -->
-        <div class="screen" id="screenHand">
-            <div class="hand-layout">
-                <div class="hand-main">
-                    <div class="poker-table-wrapper">
-                        <div class="table-felt">
-                            <div class="seat seat-pos-0" id="tableSeat0"></div>
-                            <div class="seat seat-pos-1" id="tableSeat1"></div>
-                            <div class="seat seat-pos-2" id="tableSeat2"></div>
-                            <div class="seat seat-pos-3" id="tableSeat3"></div>
-                            <div class="seat seat-pos-4" id="tableSeat4"></div>
-                            <div class="seat seat-pos-5" id="tableSeat5"></div>
-                            <div class="seat seat-pos-6" id="tableSeat6"></div>
-                            <div class="seat seat-pos-7" id="tableSeat7"></div>
-                            <div class="table-center">
-                                <div class="board-cards" id="boardCards"></div>
-                                <div class="pot-pill" id="potPill">$0</div>
+            <!-- TABLE + ACTIONS -->
+            <div class="table-area" id="tableArea">
+                <div class="hand-layout">
+                    <div class="hand-main">
+                        <div class="poker-table-wrapper">
+                            <div class="table-felt">
+                                <div class="seat seat-pos-0" id="tableSeat0"></div>
+                                <div class="seat seat-pos-1" id="tableSeat1"></div>
+                                <div class="seat seat-pos-2" id="tableSeat2"></div>
+                                <div class="seat seat-pos-3" id="tableSeat3"></div>
+                                <div class="seat seat-pos-4" id="tableSeat4"></div>
+                                <div class="seat seat-pos-5" id="tableSeat5"></div>
+                                <div class="seat seat-pos-6" id="tableSeat6"></div>
+                                <div class="seat seat-pos-7" id="tableSeat7"></div>
+                                <div class="table-center">
+                                    <div class="board-cards" id="boardCards"></div>
+                                    <div class="pot-pill" id="potPill">$0</div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="hero-hand" id="heroHand"></div>
-                    <div class="table-actions-area" id="actionsArea">
-                        <div class="opponent-action-display" id="oppActionDisplay" style="display:none;"></div>
-                        <div class="action-buttons" id="actionButtons"></div>
-                        <div class="sizing-area" id="sizingArea">
-                            <input type="text" inputmode="numeric" pattern="[0-9]*" class="sizing-input" id="sizingInput" placeholder="Bet size in $">
-                            <span class="sizing-unit">$</span>
-                            <button class="sizing-confirm" id="sizingConfirm">Confirm</button>
+                        <div class="hero-hand" id="heroHand"></div>
+
+                        <!-- CONTROL BAR: New Hand + future controls -->
+                        <div class="control-bar" id="controlBar">
+                            <button class="new-hand-btn" id="btnNewHand">New Hand</button>
                         </div>
-                        <div class="sizing-error" id="sizingError"></div>
+
+                        <div class="table-actions-area" id="actionsArea">
+                            <div class="opponent-action-display" id="oppActionDisplay" style="display:none;"></div>
+                            <div class="action-buttons" id="actionButtons"></div>
+                            <div class="sizing-area" id="sizingArea">
+                                <input type="text" inputmode="numeric" pattern="[0-9]*" class="sizing-input" id="sizingInput" placeholder="Bet size in $">
+                                <span class="sizing-unit">$</span>
+                                <button class="sizing-confirm" id="sizingConfirm">Confirm</button>
+                            </div>
+                            <div class="sizing-error" id="sizingError"></div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- SUMMARY SCREEN -->
-        <div class="screen" id="screenSummary">
-            <div class="summary-inner">
-            <div class="summary-header">
-                <h2>Hand Complete</h2>
-                <div class="summary-result" id="summaryResult"></div>
-            </div>
-
-            <div class="summary-section">
-                <h3>Hand</h3>
-                <div class="cards-row" id="summaryHoleCards" style="margin-bottom:0;"></div>
-            </div>
-
-            <div class="summary-section">
-                <h3>Board</h3>
-                <div class="cards-row" id="summaryBoardCards" style="margin-bottom:0;"></div>
-            </div>
-
-            <div class="summary-section" id="summaryActionLog">
-                <h3>Action</h3>
-            </div>
-
-            <div class="summary-actions">
-                <button class="btn-secondary" id="btnChangeConfig">Config</button>
-                <button class="deal-btn" id="btnDealNext" style="flex:2;">Deal Next Hand</button>
-            </div>
             </div>
         </div>
     </div>
@@ -1682,7 +1732,7 @@
         // Now deal the flop
         game.deck.pop(); // burn
         game.board.push(game.deck.pop(), game.deck.pop(), game.deck.pop());
-        document.getElementById('screenHand').classList.remove('preflop-animating');
+        document.getElementById('tableArea').classList.remove('preflop-animating');
         renderHand();
         await startStreetAction();
     }
@@ -1699,6 +1749,7 @@
 
     // ===== GAME STATE =====
     function startHand() {
+        clearHandCompleteBanner();
         const spotKey = config.spot === 'LIMP' ? 'LIMP_IP' : `${config.spot}_${config.position}`;
         const spot = SPOTS[spotKey];
         const deck = createDeck();
@@ -1726,10 +1777,9 @@
             seatBets: {},
         };
 
-        showScreen('hand');
         renderHand();
         // Hide board/actions during preflop animation
-        document.getElementById('screenHand').classList.add('preflop-animating');
+        document.getElementById('tableArea').classList.add('preflop-animating');
         // Play the preflop sequence, then deal flop
         playPreflopSequence();
     }
@@ -2006,8 +2056,8 @@
             oppStack: game.oppStack,
         });
 
-        renderSummary(result);
-        showScreen('summary');
+        // Show inline banner instead of navigating to summary screen
+        showHandCompleteBanner(result, game.userFolded);
     }
 
     function logAction(actor, action, amount) {
@@ -2273,47 +2323,6 @@
         document.getElementById('sizingError').classList.remove('visible');
     }
 
-    function renderSummary(resultText) {
-        document.getElementById('summaryResult').textContent = resultText;
-        document.getElementById('summaryResult').className =
-            'summary-result' + (game.userFolded ? ' lost' : '');
-
-        document.getElementById('summaryHoleCards').innerHTML =
-            game.holeCards.map(c => renderCard(c)).join('');
-
-        document.getElementById('summaryBoardCards').innerHTML =
-            game.board.map(c => renderCard(c, 'board-card')).join('');
-
-        const actionLogEl = document.getElementById('summaryActionLog');
-        let html = '<h3>Action</h3>';
-
-        let currentStreet = '';
-        for (const a of game.actions) {
-            if (a.street !== currentStreet) {
-                currentStreet = a.street;
-                html += `<div class="summary-street-label" style="margin-top:8px;font-weight:600;color:var(--text-primary);font-size:0.85rem;text-transform:uppercase;">${a.street}</div>`;
-            }
-            const amountStr = a.amount > 0 ? ` ${fmtDollar(a.amount)}` : '';
-            const isUser = a.actor === 'You';
-            html += `<div class="action-entry">
-                <span class="action-actor ${isUser ? 'user' : 'opponent'}">${a.actor}</span>
-                <span class="action-text">${a.action}</span>
-                <span class="action-amount">${amountStr}</span>
-            </div>`;
-        }
-
-        html += `<div style="margin-top:12px;padding-top:8px;border-top:1px solid var(--border-color);display:flex;justify-content:space-between;">
-            <span style="color:var(--text-secondary);font-size:0.85rem;">Final Pot</span>
-            <span style="font-family:var(--font-mono);font-weight:600;color:var(--accent-gold);">${fmtDollar(game.pot)}</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-top:4px;">
-            <span style="color:var(--text-secondary);font-size:0.85rem;">Your Remaining Stack</span>
-            <span style="font-family:var(--font-mono);font-weight:600;">${fmtDollar(game.userStack)}</span>
-        </div>`;
-
-        actionLogEl.innerHTML = html;
-    }
-
     // ===== SESSION LOG =====
     function renderSessionLog() {
         const body = document.getElementById('sessionLogBody');
@@ -2388,10 +2397,27 @@
         });
     }
 
-    // ===== SCREEN NAVIGATION =====
-    function showScreen(name) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById('screen' + name.charAt(0).toUpperCase() + name.slice(1)).classList.add('active');
+    // ===== CONFIG STRIP (mobile) =====
+    function updateConfigSummaryText() {
+        const stake = STAKES[config.stakes];
+        document.getElementById('configSummaryText').textContent =
+            `${config.position} · ${config.spot} · ${config.stack}bb · ${stake.label}`;
+    }
+
+    function showHandCompleteBanner(resultText, userFolded) {
+        // Show a brief banner in the actions area
+        const actionsArea = document.getElementById('actionsArea');
+        const banner = document.createElement('div');
+        banner.className = 'hand-complete-banner' + (userFolded ? ' lost' : '');
+        banner.textContent = resultText;
+        actionsArea.prepend(banner);
+        // Clear action buttons since hand is over
+        document.getElementById('actionButtons').innerHTML = '';
+    }
+
+    function clearHandCompleteBanner() {
+        const banner = document.querySelector('.hand-complete-banner');
+        if (banner) banner.remove();
     }
 
     // ===== EVENT LISTENERS =====
@@ -2402,6 +2428,7 @@
                 config.position = btn.dataset.value;
                 selectInGroup('positionOptions', config.position);
                 applyConfigConstraints();
+                updateConfigSummaryText();
             });
         });
 
@@ -2411,6 +2438,7 @@
                 config.spot = btn.dataset.value;
                 selectInGroup('spotOptions', config.spot);
                 applyConfigConstraints();
+                updateConfigSummaryText();
             });
         });
 
@@ -2420,6 +2448,7 @@
                 config.stack = parseInt(btn.dataset.value);
                 selectInGroup('stackOptions', btn.dataset.value);
                 applyConfigConstraints();
+                updateConfigSummaryText();
             });
         });
 
@@ -2427,6 +2456,7 @@
             btn.addEventListener('click', () => {
                 config.stakes = parseInt(btn.dataset.value);
                 selectInGroup('stakesOptions', btn.dataset.value);
+                updateConfigSummaryText();
             });
         });
     }
@@ -2435,10 +2465,27 @@
     document.addEventListener('DOMContentLoaded', () => {
         setupConfigListeners();
         applyConfigConstraints();
+        updateConfigSummaryText();
 
-        document.getElementById('btnDeal').addEventListener('click', startHand);
-        document.getElementById('btnDealNext').addEventListener('click', startHand);
-        document.getElementById('btnChangeConfig').addEventListener('click', () => showScreen('config'));
+        // New Hand button
+        document.getElementById('btnNewHand').addEventListener('click', startHand);
+
+        // Mobile config strip toggle
+        const configPanel = document.getElementById('configPanel');
+        const configToggleBtn = document.getElementById('configToggleBtn');
+        const configStripSummary = document.getElementById('configStripSummary');
+
+        // Show strip summary on mobile
+        function updateMobileStrip() {
+            const isMobile = window.matchMedia('(max-width: 767px)').matches;
+            configStripSummary.style.display = isMobile ? 'flex' : 'none';
+        }
+        updateMobileStrip();
+        window.addEventListener('resize', updateMobileStrip);
+
+        configStripSummary.addEventListener('click', () => {
+            configPanel.classList.toggle('collapsed');
+        });
 
         // Session log drawer
         document.getElementById('btnSessionLog').addEventListener('click', () => {

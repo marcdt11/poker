@@ -77,12 +77,13 @@ CSS custom properties matching PreflopTrainer's visual style:
 - **Game State Machine** — street progression (flop→turn→river→showdown), pot/stack tracking, action log
 - **Preflop Spot Definitions** — 7 preflop configs with fixed pot sizes, positions, narratives, and raising ranges
 - **Opponent Logic** — position-aware: when H is IP, V always checks then calls; when H is OOP and checks, V checks/bets 1/3 pot/bets 2/3 pot (equal 33% weight); when H is OOP and bets, V always calls
-- **Config UI** — stack depth, spot type, position, stakes with mutual exclusion rules
+- **Config UI** — stack depth, spot type, position, stakes with mutual exclusion rules. Desktop: persistent left sidebar (220px, sticky). Mobile: collapsible top strip with summary text (e.g. "IP · SRP · 200bb · $2/$5"), tap to expand/collapse
 - **Table UI** — 8-max stadium-shaped felt (responsive: vertical on mobile, horizontal on desktop) with positioned seats, hero hand below table, white glow active-turn indicators, status-colored seat borders
+- **Control Bar** — persistent "New Hand" button between hero cards and action buttons; future home for street navigation controls (go back a street, re-deal cards)
 - **Preflop Animation Sequencer** — async step-by-step preflop replay: posts blinds (~150ms), walks each PREFLOP_STEPS entry with timed delays (~300ms/action), folds seats with card-slide-away, shows bet pills, then collects into pot pill before dealing flop; seats update border colors based on action status (raised/called/posted)
 - **Chip Pills** — bet/raise/call amounts shown as white capsule pills at each seat position; collected into center orange pot pill on street completion; used in both preflop animation and postflop play
 - **Animations** — 0.25s easeInOut seat status transitions, 0.15s active position highlight, 0.4s card deal (scale+fade), fold card slide-away, action button fade in/out
-- **Session Log** — in-memory hand history, summary screen, clears on refresh
+- **Session Log** — in-memory hand history accessible via History drawer, clears on refresh. Hand completion shows inline banner on table (no separate summary screen)
 
 ### Preflop Spots
 | Spot | Position | Pot (bb) | User Invested | Description |

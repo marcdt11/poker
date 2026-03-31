@@ -56,8 +56,10 @@ _(none known)_
 - [x] Visual overhaul to match PreflopTrainer: pure black theme, green felt with brown rail, status-colored seat borders, responsive stadium table (vertical mobile/horizontal desktop), orange pot pills, white bet pills, PreflopTrainer-style action buttons (red/green/gray), faster animation timings (~300ms actions), white glow active seat indicator, navy card backs, smaller cards matching iOS app sizes
 - [x] Mobile UX improvements: larger player circles (62px), balanced card rank/suit sizing, Safari dvh viewport fix with safe-area padding, numeric keypad for bet input with zoom prevention
 - [x] Mobile card/fold polish: scaled hero + community cards to match seat height, facedown cards tucked behind seat circles, folded cards disappear completely (no dotted outlines)
+- [x] Combined setup + drill screen: config sidebar on desktop, collapsible strip on mobile, persistent "New Hand" button, no auto-summary (history via drawer only)
 
 ### Features (Future)
+- [ ] Street navigation controls (go back a street, re-deal turn/river cards)
 - [ ] Configurable preflop sizings
 - [ ] Multiway pots (3+ players)
 - [ ] Persistent session history (localStorage)
