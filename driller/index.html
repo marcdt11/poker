@@ -248,6 +248,20 @@
 
         .new-hand-btn:hover { opacity: 0.9; }
 
+        .new-street-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: var(--radius-lg);
+            color: var(--text-secondary);
+            padding: 10px 32px;
+            font-family: var(--font-sans);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s, border-color 0.2s;
+            width: 100%;
+        }
+        .new-street-btn:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
 
         /* ===== HAND SCREEN ===== */
         .hand-layout {
@@ -380,6 +394,18 @@
             font-size: 11px;
             color: rgba(255,255,255,0.6);
             line-height: 1;
+        }
+
+        .seat-action {
+            font-weight: 700;
+            font-size: 11px;
+            color: #fff;
+            line-height: 1;
+            animation: seatActionFade 0.2s ease;
+        }
+        @keyframes seatActionFade {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
         }
 
         .seat-hero-label {
@@ -588,6 +614,7 @@
             display: flex;
             gap: 12px;
             margin-bottom: 8px;
+            min-height: 44px;
             opacity: 1;
             transition: opacity 0.25s ease-in-out;
         }
@@ -639,13 +666,14 @@
         }
 
         .sizing-area {
-            display: none;
+            display: flex;
             gap: 8px;
             align-items: center;
             margin-bottom: 8px;
+            visibility: hidden;
         }
 
-        .sizing-area.visible { display: flex; }
+        .sizing-area.visible { visibility: visible; }
 
         .sizing-input {
             flex: 1;
@@ -946,6 +974,14 @@
         .preflop-animating .board-cards { visibility: hidden; }
         .preflop-animating #actionButtons { visibility: hidden; }
 
+        /* ===== MOBILE MODE ELEMENTS (hidden on desktop) ===== */
+        .play-mode-header,
+        .start-drilling-btn,
+        .mobile-new-hand,
+        .mobile-new-street {
+            display: none;
+        }
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 767px) {
             .hand-layout {
@@ -1056,15 +1092,9 @@
         }
 
         @media (max-width: 767px) {
-            /* Mobile: collapsible strip behavior */
+            /* Mobile config base styles */
             .config-panel {
                 padding: 12px;
-            }
-            .config-strip-summary {
-                margin-bottom: 0;
-            }
-            .config-panel:not(.collapsed) .config-strip-summary {
-                margin-bottom: 12px;
             }
             .config-group {
                 margin-bottom: 10px;
@@ -1081,6 +1111,92 @@
                 font-size: 0.9rem;
                 width: 100%;
             }
+
+            /* ---- Setup mode (default on mobile) ---- */
+            .app:not(.play-mode) .table-area {
+                display: none;
+            }
+            .app:not(.play-mode) .play-mode-header {
+                display: none;
+            }
+            .app:not(.play-mode) .sidebar {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+            }
+            .app:not(.play-mode) .sidebar .new-hand-btn {
+                display: none;
+            }
+            .app:not(.play-mode) .config-panel {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+            }
+            .app:not(.play-mode) .config-body {
+                display: flex !important;
+                flex-direction: column;
+                flex: 1;
+            }
+            .app:not(.play-mode) .config-strip-summary {
+                display: none !important;
+            }
+            .app:not(.play-mode) .start-drilling-btn {
+                display: block;
+                margin-top: auto;
+                background: var(--accent-green);
+                border: none;
+                border-radius: var(--radius-lg);
+                color: #fff;
+                padding: 14px 32px;
+                font-family: var(--font-sans);
+                font-size: 1rem;
+                font-weight: 700;
+                cursor: pointer;
+                width: 100%;
+            }
+
+            /* ---- Play mode ---- */
+            .app.play-mode .sidebar {
+                display: none;
+            }
+            .app.play-mode .header {
+                display: none;
+            }
+            .app.play-mode .play-mode-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 8px 16px;
+                background: var(--bg-secondary);
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+                font-family: var(--font-mono);
+                font-size: 0.8rem;
+                color: var(--text-secondary);
+                flex-shrink: 0;
+            }
+            .play-mode-setup-btn {
+                background: none;
+                border: 1px solid rgba(255,255,255,0.2);
+                border-radius: var(--radius-md);
+                color: var(--text-secondary);
+                font-family: var(--font-sans);
+                font-size: 0.75rem;
+                padding: 4px 10px;
+                cursor: pointer;
+            }
+            .app.play-mode .main-layout {
+                flex: 1;
+            }
+            .app.play-mode .table-area {
+                flex: 1;
+            }
+            .app.play-mode .mobile-new-hand,
+            .app.play-mode .mobile-new-street {
+                display: block;
+                width: 100%;
+                padding: 10px 24px;
+                font-size: 0.9rem;
+            }
         }
 
         @media (min-width: 768px) {
@@ -1091,12 +1207,15 @@
                 flex-direction: row;
                 gap: 20px;
             }
-            .config-panel {
-                width: 220px;
+            .sidebar {
+                width: 330px;
                 flex-shrink: 0;
                 align-self: flex-start;
                 position: sticky;
                 top: 24px;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
             }
             /* Hide collapsible strip on desktop — always show full config */
             .config-strip-summary {
@@ -1109,6 +1228,10 @@
                 flex: 1;
                 min-width: 0;
             }
+            .table-actions-area {
+                min-height: 120px;
+                flex-shrink: 0;
+            }
 
             .table-felt {
                 aspect-ratio: 2 / 1;
@@ -1117,7 +1240,8 @@
                 width: clamp(64px, 5.5vw, 96px);
                 height: clamp(64px, 5.5vw, 96px);
             }
-            .seat-stack {
+            .seat-stack,
+            .seat-action {
                 font-size: clamp(13px, 1.1vw, 18px);
             }
             .seat-position {
@@ -1177,7 +1301,12 @@
 
         <!-- MAIN LAYOUT: sidebar + table -->
         <div class="main-layout">
-            <!-- CONFIG SIDEBAR (desktop) / STRIP (mobile) -->
+            <div class="play-mode-header" id="playModeHeader">
+                <span id="playModeSummary">IP · SRP · 200bb · $2/$5</span>
+                <button class="play-mode-setup-btn" id="btnChangeSetup">&#9881; Setup</button>
+            </div>
+            <!-- SIDEBAR: config + new hand button -->
+            <div class="sidebar">
             <div class="config-panel" id="configPanel">
                 <div class="config-strip-summary" id="configStripSummary" style="display:none;">
                     <span id="configSummaryText">IP · SRP · 200bb · $2/$5</span>
@@ -1220,7 +1349,11 @@
                             <button class="config-btn" data-value="10">$5/$10</button>
                         </div>
                     </div>
+                    <button class="start-drilling-btn" id="btnStartDrilling">Start Drilling</button>
                 </div>
+            </div>
+            <button class="new-hand-btn" id="btnNewHand">New Hand</button>
+            <button class="new-street-btn" id="btnNewStreet">New Flop</button>
             </div>
 
             <!-- TABLE + ACTIONS -->
@@ -1245,9 +1378,10 @@
                         </div>
                         <div class="hero-hand" id="heroHand"></div>
 
-                        <!-- CONTROL BAR: New Hand + future controls -->
+                        <!-- CONTROL BAR: New Hand on mobile play mode -->
                         <div class="control-bar" id="controlBar">
-                            <button class="new-hand-btn" id="btnNewHand">New Hand</button>
+                            <button class="new-hand-btn mobile-new-hand" id="btnNewHandMobile">New Hand</button>
+                            <button class="new-street-btn mobile-new-street" id="btnNewStreetMobile">New Flop</button>
                         </div>
 
                         <div class="table-actions-area" id="actionsArea">
@@ -1695,18 +1829,23 @@
                 // Bet/raise/call action
                 const seat = step.seat;
                 // Update seat status based on action
+                let actionLabel = step.action;
                 if (step.action.includes('raise') || step.action.includes('bet') || step.action.includes('3-bet') || step.action.includes('4-bet')) {
                     game.seatStates[seat] = 'raised';
                 } else if (step.action === 'calls') {
                     game.seatStates[seat] = 'called';
+                    actionLabel = 'call';
                 } else if (step.action === 'limps') {
                     game.seatStates[seat] = 'called';
+                    actionLabel = 'limp';
                 }
-                // Show action indicator
+                // Show action label in seat circle
+                game.seatAction = { seat, text: actionLabel };
                 renderTableSeats(seat);
                 await delay(300);
 
-                // Place bet pill
+                // Place bet pill, clear action label
+                game.seatAction = null;
                 game.seatBets[seat] = (game.seatBets[seat] || 0) + step.bb;
                 renderTableSeats(seat);
                 await delay(300);
@@ -1784,6 +1923,63 @@
         playPreflopSequence();
     }
 
+    function updateNewStreetButton() {
+        const label = game ? 'New ' + (STREETS[game.streetIndex] || 'Flop').charAt(0).toUpperCase() + (STREETS[game.streetIndex] || 'flop').slice(1) : 'New Flop';
+        document.getElementById('btnNewStreet').textContent = label;
+        document.getElementById('btnNewStreetMobile').textContent = label;
+    }
+
+    function rerollStreet() {
+        if (!game || !game.board || game.board.length === 0) return;
+
+        // Clear action buttons and sizing
+        document.getElementById('actionButtons').innerHTML = '';
+        hideSizing();
+
+        // Determine how many cards to replace based on current street
+        const streetIdx = game.streetIndex;
+        if (streetIdx === 0) {
+            // Re-deal entire flop: put old flop cards back, burn + deal 3 new
+            const oldBoard = game.board.splice(0);
+            game.deck.push(...oldBoard);
+            game.deck = shuffle(game.deck);
+            game.deck.pop(); // burn
+            game.board.push(game.deck.pop(), game.deck.pop(), game.deck.pop());
+        } else if (streetIdx === 1) {
+            // Re-deal turn card only: put old turn back, burn + deal 1 new
+            const oldTurn = game.board.pop();
+            game.deck.push(oldTurn);
+            game.deck = shuffle(game.deck);
+            game.deck.pop(); // burn
+            game.board.push(game.deck.pop());
+        } else if (streetIdx === 2) {
+            // Re-deal river card only: put old river back, burn + deal 1 new
+            const oldRiver = game.board.pop();
+            game.deck.push(oldRiver);
+            game.deck = shuffle(game.deck);
+            game.deck.pop(); // burn
+            game.board.push(game.deck.pop());
+        }
+
+        // Reset street state and re-render
+        game.renderedBoardCount = game.board.length - (streetIdx === 0 ? 3 : 1);
+        game.streetActions = [];
+        game.pendingAction = null;
+        game.seatAction = null;
+        game.seatBets = {};
+
+        // Reset stacks to what they were at start of this street
+        game.userStack = config.stack - game.spot.userInvested;
+        game.oppStack = config.stack - game.spot.oppInvested;
+        // Recalculate pot as initial pot (actions from previous streets are lost on reroll)
+        game.pot = game.spot.pot;
+        game.displayPot = game.pot;
+        renderPotPill();
+
+        renderHand();
+        startStreetAction();
+    }
+
     function getCurrentStreet() {
         return STREETS[game.streetIndex] || 'showdown';
     }
@@ -1797,8 +1993,16 @@
     }
 
     async function startStreetAction() {
+        // Track if hero checked back last street (IP only — V checked, then H checked)
+        const heroIsIP = !isUserOOP();
+        game.heroCheckedBackLastStreet = heroIsIP &&
+            game.streetActions &&
+            game.streetActions.length === 2 &&
+            game.streetActions[0].action === 'check' &&
+            game.streetActions[1].action === 'check';
         game.streetActions = [];
         game.pendingAction = null;
+        updateNewStreetButton();
 
         if (userActsFirst()) {
             promptUserAction(null);
@@ -1815,15 +2019,43 @@
             return;
         }
 
-        // Pause before V acts so it feels like V is thinking
+        // Show villain as active while "thinking"
+        game.activeTurn = 'villain';
+        renderHand();
         await delay(700);
 
         const heroIsIP = !isUserOOP();
 
         if (heroIsIP) {
-            // Hero is IP → V acts first, always checks; always calls any bet/raise
+            // Hero is IP → V acts first
             if (facingBet === null) {
-                action = 'checks';
+                if (game.heroCheckedBackLastStreet) {
+                    // H checked back last street → V mixes: check 33%, bet 1/3 pot 33%, bet 2/3 pot 33%
+                    const roll = Math.random();
+                    if (roll < 1/3) {
+                        action = 'checks';
+                    } else if (roll < 2/3) {
+                        const betSize = ceilTo5Dollars(game.pot * (1/3));
+                        amount = Math.min(betSize, game.oppStack);
+                        if (amount >= game.oppStack) {
+                            action = 'goes all in';
+                            amount = game.oppStack;
+                        } else {
+                            action = 'bets';
+                        }
+                    } else {
+                        const betSize = ceilTo5Dollars(game.pot * (2/3));
+                        amount = Math.min(betSize, game.oppStack);
+                        if (amount >= game.oppStack) {
+                            action = 'goes all in';
+                            amount = game.oppStack;
+                        } else {
+                            action = 'bets';
+                        }
+                    }
+                } else {
+                    action = 'checks';
+                }
             } else {
                 action = 'calls';
                 amount = Math.min(facingBet.amount, game.oppStack);
@@ -1863,16 +2095,15 @@
 
         // Apply opponent action
         const villainSeat = game.spot.villainSeat;
-        const oppDisplay = document.getElementById('oppActionDisplay');
 
         if (action === 'checks') {
             logAction('Opponent', 'checks', 0);
             game.streetActions.push({ actor: 'opp', action: 'check' });
-            oppDisplay.textContent = 'Opponent checks';
-            oppDisplay.style.display = 'block';
+            game.seatAction = { seat: villainSeat, text: 'check' };
             renderHand();
             await delay(700);
-            oppDisplay.style.display = 'none';
+            game.seatAction = null;
+            renderHand();
             if (game.streetActions.some(a => a.actor === 'user')) {
                 await advanceStreet();
             } else {
@@ -1884,8 +2115,11 @@
             showSeatBet(villainSeat, amount);
             logAction('Opponent', 'calls', amount);
             game.streetActions.push({ actor: 'opp', action: 'call', amount });
+            game.seatAction = { seat: villainSeat, text: 'call' };
             renderHand();
             await delay(700);
+            game.seatAction = null;
+            renderHand();
             if (game.oppStack <= 0 || game.userStack <= 0) {
                 game.allIn = true;
                 collectBetsIntoPot();
@@ -1899,11 +2133,11 @@
             showSeatBet(villainSeat, amount);
             logAction('Opponent', 'bets', amount);
             game.streetActions.push({ actor: 'opp', action: 'bet', amount });
-            oppDisplay.textContent = `Opponent bets ${fmtDollar(amount)}`;
-            oppDisplay.style.display = 'block';
+            game.seatAction = { seat: villainSeat, text: `bet ${fmtDollar(amount)}` };
             renderHand();
             await delay(700);
-            oppDisplay.style.display = 'none';
+            game.seatAction = null;
+            renderHand();
             promptUserAction({ type: 'bet', amount });
         } else if (action === 'raises to') {
             game.oppStack -= amount;
@@ -1911,11 +2145,11 @@
             showSeatBet(villainSeat, amount);
             logAction('Opponent', 'raises to', amount);
             game.streetActions.push({ actor: 'opp', action: 'raise', amount });
-            oppDisplay.textContent = `Opponent raises to ${fmtDollar(amount)}`;
-            oppDisplay.style.display = 'block';
+            game.seatAction = { seat: villainSeat, text: `raise ${fmtDollar(amount)}` };
             renderHand();
             await delay(700);
-            oppDisplay.style.display = 'none';
+            game.seatAction = null;
+            renderHand();
             promptUserAction({ type: 'raise', amount });
         } else if (action === 'goes all in') {
             game.oppStack -= amount;
@@ -1923,11 +2157,11 @@
             showSeatBet(villainSeat, amount);
             logAction('Opponent', 'goes all in', amount);
             game.streetActions.push({ actor: 'opp', action: 'allin', amount });
-            oppDisplay.textContent = `Opponent goes all in ${fmtDollar(amount)}`;
-            oppDisplay.style.display = 'block';
+            game.seatAction = { seat: villainSeat, text: 'all in' };
             renderHand();
             await delay(700);
-            oppDisplay.style.display = 'none';
+            game.seatAction = null;
+            renderHand();
             promptUserAction({ type: 'raise', amount });
         }
     }
@@ -1956,6 +2190,11 @@
         if (action === 'check') {
             logAction('You', 'check', 0);
             game.streetActions.push({ actor: 'user', action: 'check' });
+            game.seatAction = { seat: heroSeat, text: 'check' };
+            game.activeTurn = 'hero';
+            renderHand();
+            await delay(700);
+            game.seatAction = null;
             renderHand();
             if (game.streetActions.some(a => a.actor === 'opp')) {
                 await advanceStreet();
@@ -1969,8 +2208,12 @@
             showSeatBet(heroSeat, callAmount);
             logAction('You', 'call', callAmount);
             game.streetActions.push({ actor: 'user', action: 'call', amount: callAmount });
+            game.seatAction = { seat: heroSeat, text: 'call' };
+            game.activeTurn = 'hero';
             renderHand();
             await delay(700);
+            game.seatAction = null;
+            renderHand();
             if (game.userStack <= 0 || game.oppStack <= 0) {
                 game.allIn = true;
                 collectBetsIntoPot();
@@ -1982,12 +2225,17 @@
             game.userStack -= amount;
             game.pot += amount;
             showSeatBet(heroSeat, amount);
-            const label = action === 'bet' ? 'bets' : 'raises to';
+            const label = action === 'bet' ? 'bet' : 'raise';
             const isAllIn = game.userStack <= 0;
-            logAction('You', isAllIn ? 'goes all in' : label, amount);
+            const actionText = isAllIn ? 'all in' : `${label} ${fmtDollar(amount)}`;
+            logAction('You', isAllIn ? 'goes all in' : (action === 'bet' ? 'bets' : 'raises to'), amount);
             game.streetActions.push({ actor: 'user', action, amount });
+            game.seatAction = { seat: heroSeat, text: actionText };
+            game.activeTurn = 'hero';
             renderHand();
             await delay(700);
+            game.seatAction = null;
+            renderHand();
             if (isAllIn) game.allIn = true;
             await doOpponentAction({ type: action, amount });
         }
@@ -2056,8 +2304,7 @@
             oppStack: game.oppStack,
         });
 
-        // Show inline banner instead of navigating to summary screen
-        showHandCompleteBanner(result, game.userFolded);
+        // Hand ends silently — no banner, just ready for next hand
     }
 
     function logAction(actor, action, amount) {
@@ -2118,6 +2365,11 @@
     }
 
     function renderTableSeats(activeTurn) {
+        // Persist activeTurn in game state so every render knows who's glowing
+        if (activeTurn !== undefined) {
+            game.activeTurn = activeTurn;
+        }
+        activeTurn = game.activeTurn || null;
         const spot = game.spot;
         const heroSeatIndex = FULL_TABLE.indexOf(spot.heroSeat);
 
@@ -2184,8 +2436,13 @@
             const isBTN = position === 'BTN';
             seatEl.className = 'seat seat-pos-' + visualIndex + ' ' + (isSeatFolded ? 'folded' : type) + (isBTN ? ' btn-seat' : '') + statusClass + activeClass;
             const posLabel = isSeatFolded ? '' : `<div class="seat-position">${position}</div>`;
-            const stackLabel = stackStr && !isSeatFolded ? `<div class="seat-stack">${stackStr}</div>` : '';
-            seatEl.innerHTML = `${dealerBadge}${heroLabel}${posLabel}${stackLabel}${pillHtml}`;
+            let stackOrAction = '';
+            if (game.seatAction && game.seatAction.seat === position) {
+                stackOrAction = `<div class="seat-action">${game.seatAction.text}</div>`;
+            } else if (stackStr && !isSeatFolded) {
+                stackOrAction = `<div class="seat-stack">${stackStr}</div>`;
+            }
+            seatEl.innerHTML = `${dealerBadge}${heroLabel}${posLabel}${stackOrAction}${pillHtml}`;
 
             let cardsHTML = '';
             if (isSeatFolded) {
@@ -2242,16 +2499,7 @@
 
     function renderActionButtons(facingBet) {
         const btnsEl = document.getElementById('actionButtons');
-        const oppDisplay = document.getElementById('oppActionDisplay');
-
-        if (facingBet) {
-            oppDisplay.textContent = `Opponent ${facingBet.type === 'bet' ? 'bets' : 'raises to'} ${fmtDollar(facingBet.amount)}`;
-            oppDisplay.style.display = 'block';
-            renderTableSeats('villain');
-        } else {
-            oppDisplay.style.display = 'none';
-            renderTableSeats('hero');
-        }
+        renderTableSeats('hero');
 
         let html = '';
         if (facingBet) {
@@ -2400,8 +2648,10 @@
     // ===== CONFIG STRIP (mobile) =====
     function updateConfigSummaryText() {
         const stake = STAKES[config.stakes];
-        document.getElementById('configSummaryText').textContent =
-            `${config.position} · ${config.spot} · ${config.stack}bb · ${stake.label}`;
+        const text = `${config.position} · ${config.spot} · ${config.stack}bb · ${stake.label}`;
+        document.getElementById('configSummaryText').textContent = text;
+        const playModeSummary = document.getElementById('playModeSummary');
+        if (playModeSummary) playModeSummary.textContent = text;
     }
 
     function showHandCompleteBanner(resultText, userFolded) {
@@ -2467,24 +2717,37 @@
         applyConfigConstraints();
         updateConfigSummaryText();
 
-        // New Hand button
+        // New Hand buttons (sidebar on desktop, control bar on mobile)
         document.getElementById('btnNewHand').addEventListener('click', startHand);
+        document.getElementById('btnNewHandMobile').addEventListener('click', startHand);
+        document.getElementById('btnNewStreet').addEventListener('click', rerollStreet);
+        document.getElementById('btnNewStreetMobile').addEventListener('click', rerollStreet);
 
-        // Mobile config strip toggle
-        const configPanel = document.getElementById('configPanel');
-        const configToggleBtn = document.getElementById('configToggleBtn');
-        const configStripSummary = document.getElementById('configStripSummary');
+        // Mobile mode switching
+        const appEl = document.querySelector('.app');
 
-        // Show strip summary on mobile
-        function updateMobileStrip() {
-            const isMobile = window.matchMedia('(max-width: 767px)').matches;
-            configStripSummary.style.display = isMobile ? 'flex' : 'none';
+        function enterPlayMode() {
+            appEl.classList.add('play-mode');
+            updateConfigSummaryText();
+            requestAnimationFrame(() => positionSeatsOnStadium());
         }
-        updateMobileStrip();
-        window.addEventListener('resize', updateMobileStrip);
 
-        configStripSummary.addEventListener('click', () => {
-            configPanel.classList.toggle('collapsed');
+        function enterSetupMode() {
+            appEl.classList.remove('play-mode');
+        }
+
+        document.getElementById('btnStartDrilling').addEventListener('click', () => {
+            enterPlayMode();
+            startHand();
+        });
+
+        document.getElementById('btnChangeSetup').addEventListener('click', enterSetupMode);
+
+        // Remove play-mode if resized to desktop
+        window.addEventListener('resize', () => {
+            if (!window.matchMedia('(max-width: 767px)').matches) {
+                appEl.classList.remove('play-mode');
+            }
         });
 
         // Session log drawer

@@ -76,10 +76,10 @@ CSS custom properties matching PreflopTrainer's visual style:
 - **Deck Engine** — Fisher-Yates shuffle, deal with burn cards, no duplicates. Hero hole cards dealt from preflop raising ranges (embedded per spot from PreflopTrainer data)
 - **Game State Machine** — street progression (flop→turn→river→showdown), pot/stack tracking, action log
 - **Preflop Spot Definitions** — 7 preflop configs with fixed pot sizes, positions, narratives, and raising ranges
-- **Opponent Logic** — position-aware: when H is IP, V always checks then calls; when H is OOP and checks, V checks/bets 1/3 pot/bets 2/3 pot (equal 33% weight); when H is OOP and bets, V always calls
-- **Config UI** — stack depth, spot type, position, stakes with mutual exclusion rules. Desktop: persistent left sidebar (220px, sticky). Mobile: collapsible top strip with summary text (e.g. "IP · SRP · 200bb · $2/$5"), tap to expand/collapse
+- **Opponent Logic** — position-aware: when H is IP, V checks then calls (but if H checked back previous street, V mixes check/bet ⅓ pot/bet ⅔ pot at 33% each); when H is OOP and checks, V checks/bets ⅓ pot/bets ⅔ pot (equal 33% weight); when H is OOP and bets, V always calls
+- **Config UI** — stack depth, spot type, position, stakes with mutual exclusion rules. Desktop: persistent left sidebar (330px, sticky). Mobile: two-mode system — **Setup mode** (full-screen config with "Start Drilling" button) and **Play mode** (full-screen table with compact header showing config summary + gear icon to return to Setup)
 - **Table UI** — 8-max stadium-shaped felt (responsive: vertical on mobile, horizontal on desktop) with positioned seats, hero hand below table, white glow active-turn indicators, status-colored seat borders
-- **Control Bar** — persistent "New Hand" button between hero cards and action buttons; future home for street navigation controls (go back a street, re-deal cards)
+- **Control Bar** — "New Hand" button lives in sidebar on desktop (below config panel), in control bar on mobile play mode; future home for street navigation controls
 - **Preflop Animation Sequencer** — async step-by-step preflop replay: posts blinds (~150ms), walks each PREFLOP_STEPS entry with timed delays (~300ms/action), folds seats with card-slide-away, shows bet pills, then collects into pot pill before dealing flop; seats update border colors based on action status (raised/called/posted)
 - **Chip Pills** — bet/raise/call amounts shown as white capsule pills at each seat position; collected into center orange pot pill on street completion; used in both preflop animation and postflop play
 - **Animations** — 0.25s easeInOut seat status transitions, 0.15s active position highlight, 0.4s card deal (scale+fade), fold card slide-away, action button fade in/out
