@@ -66,6 +66,7 @@ _(none known)_
 - [x] Opponent card-back polish: desktop facedown cards are tucked behind seat/ring and overlap slightly to match reference compact stacking
 - [x] Layering correction pass: hero + opponent cards now render below seat and active ring overlays; opponent hidden card overlap increased to tighter stack
 - [x] Layer order hardening: desktop seat layers now follow explicit stack (table < cards < seat < text < active ring < HERO label)
+- [x] Mobile reference-emulation pass: rail-centered seats, centered side-seat text, and compact side hidden-card markers replacing bunny-ear styling
 
 ### Features (Future)
 - [ ] Street navigation controls (go back a street, re-deal turn/river cards)
