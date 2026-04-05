@@ -62,13 +62,13 @@ A collection of web-based poker tools hosted at `poker.marctorrence.com`. Curren
 CSS custom properties matching PreflopTrainer's visual style:
 - Pure black theme (`--bg-primary: #000000`, `--bg-secondary: #111111`)
 - Table felt: solid `#1a612e` with `#267038` inner line, brown rail gradient (`#4D3820` → `#332412`)
-- Seat circles: `#333340` background, 44px diameter (scales up on desktop), status-colored borders (yellow=hero, orange=raised, blue=called, white 50%=posted, white 30%=default/folded)
+- Seat circles: `#333340` background, 44px base diameter (responsive scaling), status-colored borders (yellow=hero, orange=raised, blue=called, white 50%=posted, white 30%=default/folded)
 - Active seat: white 3px border + white glow shadow (no pulse animation)
 - Cards: hero 48×68px, board 36×50px, card backs navy `#1a2659`
 - Action buttons: red (raise/bet), green (call/check), gray (fold), 44px height, 10px radius
 - Pot pill: orange capsule, bet pills: white background with black text
-- Responsive table: horizontal stadium (2:1) on desktop, vertical stadium (0.7:1) on mobile
-- Mobile optimizations: `100dvh` viewport with `env(safe-area-inset-bottom)` for iOS Safari, 62px seats with 12px labels, balanced rank/suit font sizing, numeric keypad bet input (`inputmode="numeric"`), zoom prevention via `maximum-scale=1.0`, cards scaled to seat height, facedown cards tucked behind circles, folded cards hidden completely
+- Responsive table: horizontal stadium (2:1) on desktop, tighter vertical stadium (0.58:1) on mobile
+- Mobile optimizations: `100dvh` viewport with `env(safe-area-inset-bottom)` for iOS Safari, 58px seats with 12px labels, balanced rank/suit font sizing, numeric keypad bet input (`inputmode="numeric"`), zoom prevention via `maximum-scale=1.0`, cards scaled to seat height, facedown cards tucked behind circles, folded cards hidden completely
 - Fonts: Outfit (UI) + JetBrains Mono (numbers/data)
 - Loaded via Google Fonts CDN
 
@@ -78,10 +78,11 @@ CSS custom properties matching PreflopTrainer's visual style:
 - **Preflop Spot Definitions** — 7 preflop configs with fixed pot sizes, positions, narratives, and raising ranges
 - **Opponent Logic** — position-aware: when H is IP, V checks then calls (but if H checked back previous street, V mixes check/bet ⅓ pot/bet ⅔ pot at 33% each); when H is OOP and checks, V checks/bets ⅓ pot/bets ⅔ pot (equal 33% weight); when H is OOP and bets, V always calls
 - **Config UI** — stack depth, spot type, position, stakes with mutual exclusion rules. Desktop: persistent left sidebar (330px, sticky). Mobile: two-mode system — **Setup mode** (full-screen config with "Start Drilling" button) and **Play mode** (full-screen table with compact header showing config summary + gear icon to return to Setup)
-- **Table UI** — 8-max stadium-shaped felt (responsive: vertical on mobile, horizontal on desktop) with positioned seats, hero hand below table, white glow active-turn indicators, status-colored seat borders
+- **Table UI** — 8-max stadium-shaped felt (responsive: vertical on mobile, horizontal on desktop) with rail-aligned seat positioning (desktop tuned so the rail crosses near each seat midline while staying in viewport), hero hand below table, white glow active-turn indicators, status-colored seat borders
 - **Control Bar** — "New Hand" button lives in sidebar on desktop (below config panel), in control bar on mobile play mode; future home for street navigation controls
-- **Preflop Animation Sequencer** — async step-by-step preflop replay: posts blinds (~150ms), walks each PREFLOP_STEPS entry with timed delays (~300ms/action), folds seats with card-slide-away, shows bet pills, then collects into pot pill before dealing flop; seats update border colors based on action status (raised/called/posted)
+- **Preflop Animation Sequencer** — async step-by-step preflop replay: posts blinds, walks each PREFLOP_STEPS entry with single-phase sequential actions (active ring + action text together), folds seats with card-slide-away, shows bet pills, then collects into pot pill before dealing flop; seats update border colors based on action status (raised/called/posted)
 - **Chip Pills** — bet/raise/call amounts shown as white capsule pills at each seat position; collected into center orange pot pill on street completion; used in both preflop animation and postflop play
+- **Seat Layering** — bet pills render above seat cards to preserve readability during animations; desktop layering order is explicit: table < seat cards < seat circle/border < position/stack text < active ring < HERO label
 - **Animations** — 0.25s easeInOut seat status transitions, 0.15s active position highlight, 0.4s card deal (scale+fade), fold card slide-away, action button fade in/out
 - **Session Log** — in-memory hand history accessible via History drawer, clears on refresh. Hand completion shows inline banner on table (no separate summary screen)
 

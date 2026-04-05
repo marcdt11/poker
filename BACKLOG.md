@@ -57,6 +57,15 @@ _(none known)_
 - [x] Mobile UX improvements: larger player circles (62px), balanced card rank/suit sizing, Safari dvh viewport fix with safe-area padding, numeric keypad for bet input with zoom prevention
 - [x] Mobile card/fold polish: scaled hero + community cards to match seat height, facedown cards tucked behind seat circles, folded cards disappear completely (no dotted outlines)
 - [x] Combined setup + drill screen: config sidebar on desktop, collapsible strip on mobile, persistent "New Hand" button, no auto-summary (history via drawer only)
+- [x] Preflop/postflop action flow polish: each action now displays in-seat as a single sequential step (no separate pre-action highlight jump)
+- [x] Table/seat UX polish: side-seat hole cards now anchor inward toward table center, and stadium seat placement uses inset geometry to avoid off-screen circles/cards
+- [x] Mobile table layout tune: switched to tighter vertical stadium ratio (0.58:1) and slightly smaller play-mode seats (58px) for better fit with controls
+- [x] Desktop rail alignment polish: seat inset tuned so player circles sit on the felt rail rather than floating inward
+- [x] Layering/spacing polish: hero bet pills render above cards, and opponent card anchors shifted so cards no longer cover player circles
+- [x] Reference emulation pass: desktop rail now crosses near seat centers and cards anchor to each seat's outer side (away from table interior)
+- [x] Opponent card-back polish: desktop facedown cards are tucked behind seat/ring and overlap slightly to match reference compact stacking
+- [x] Layering correction pass: hero + opponent cards now render below seat and active ring overlays; opponent hidden card overlap increased to tighter stack
+- [x] Layer order hardening: desktop seat layers now follow explicit stack (table < cards < seat < text < active ring < HERO label)
 
 ### Features (Future)
 - [ ] Street navigation controls (go back a street, re-deal turn/river cards)
