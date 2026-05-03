@@ -30,6 +30,7 @@
 1. Read PROJECT.md for orientation
 2. Do not read source files whole — search or offset only
 3. Ask clarifying questions if scope is unclear before writing code
+4. Run `git pull --rebase origin main` before making changes — syncs with any work pushed by other agents (Cursor, GitHub web UI, etc.) and surfaces conflicts up front instead of at commit time
 
 **Documentation (MANDATORY — do not skip):**
 - **`PROJECT.md`** must stay in sync with the codebase. Update it **in the same commit** as the code change, not as a follow-up. Specifically update:
