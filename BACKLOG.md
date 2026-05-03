@@ -67,6 +67,7 @@ _(none known)_
 - [x] Layering correction pass: hero + opponent cards now render below seat and active ring overlays; opponent hidden card overlap increased to tighter stack
 - [x] Layer order hardening: desktop seat layers now follow explicit stack (table < cards < seat < text < active ring < HERO label)
 - [x] Mobile reference-emulation pass: rail-centered seats, centered side-seat text, and compact side hidden-card markers replacing bunny-ear styling
+- [x] Pot math + bet sizing audit: corrected 4BP_OOP pot (101 → 101.5bb), fixed SB seat-bet pill overcount on 'raises to' actions, aligned session-log pot rounding with in-game pot pill, villain postflop bets now round to $5 increments regardless of stakes (hero sizing remains free-form)
 
 ### Features (Future)
 - [ ] Street navigation controls (go back a street, re-deal turn/river cards)
@@ -80,7 +81,7 @@ _(none known)_
 - [ ] Villain player types — assign profiles (e.g. tight/passive, loose/aggressive, calling station) that change opponent betting/calling behavior
 
 ### Bugs
-- [ ] SRP initial pot displays $32 instead of $31.50 due to rounding (0.5bb dead SB × $3)
+_(none known)_
 
 ### Tech Debt
 - Single-file architecture will need splitting if app grows significantly

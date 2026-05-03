@@ -76,7 +76,8 @@ CSS custom properties matching PreflopTrainer's visual style:
 - **Deck Engine** — Fisher-Yates shuffle, deal with burn cards, no duplicates. Hero hole cards dealt from preflop raising ranges (embedded per spot from PreflopTrainer data)
 - **Game State Machine** — street progression (flop→turn→river→showdown), pot/stack tracking, action log
 - **Preflop Spot Definitions** — 7 preflop configs with fixed pot sizes, positions, narratives, and raising ranges
-- **Opponent Logic** — position-aware: when H is IP, V checks then calls (but if H checked back previous street, V mixes check/bet ⅓ pot/bet ⅔ pot at 33% each); when H is OOP and checks, V checks/bets ⅓ pot/bets ⅔ pot (equal 33% weight); when H is OOP and bets, V always calls
+- **Opponent Logic** — position-aware: when H is IP, V checks then calls (but if H checked back previous street, V mixes check/bet ⅓ pot/bet ⅔ pot at 33% each); when H is OOP and checks, V checks/bets ⅓ pot/bets ⅔ pot (equal 33% weight); when H is OOP and bets, V always calls.
+- **Postflop Bet Sizing** — Villain postflop bets round to $5 increments regardless of stakes (`POSTFLOP_BET_INCREMENT`), with a max(1 BB, $5) floor. Hero sizing is free-form (any $ amount ≥ 1 BB).
 - **Config UI** — stack depth, spot type, position, stakes with mutual exclusion rules. Desktop: persistent left sidebar (330px, sticky). Mobile: two-mode system — **Setup mode** (full-screen config with "Start Drilling" button) and **Play mode** (full-screen table with compact header showing config summary + gear icon to return to Setup)
 - **Table UI** — 8-max stadium-shaped felt (responsive: vertical on mobile, horizontal on desktop) with rail-aligned seat positioning (desktop tuned so the rail crosses near each seat midline while staying in viewport), hero hand below table, white glow active-turn indicators, status-colored seat borders
 - **Control Bar** — "New Hand" button lives in sidebar on desktop (below config panel), in control bar on mobile play mode; future home for street navigation controls
@@ -95,7 +96,7 @@ CSS custom properties matching PreflopTrainer's visual style:
 | 3BP  | IP       | 33.5     | 16            | Opp opens 4bb CO, user 3b 16bb BTN |
 | 3BP  | OOP      | 41       | 20            | Opp opens 4bb BTN, user 3b 20bb SB |
 | 4BP  | IP       | 89       | 44            | User opens 5bb BTN, opp 3b 20bb SB, user 4b 44bb |
-| 4BP  | OOP      | 101      | 50            | User opens 5bb CO, opp 3b 20bb BTN, user 4b 50bb |
+| 4BP  | OOP      | 101.5    | 50            | User opens 5bb CO, opp 3b 20bb BTN, user 4b 50bb |
 
 ### Config Constraints
 - 4BP disabled when 100bb stack selected (and vice versa)
@@ -103,6 +104,5 @@ CSS custom properties matching PreflopTrainer's visual style:
 - Default: IP, SRP, 200bb, $2/$5
 
 ## Known Issues
-- **Driller**: Pot rounding — 10.5bb × $3 = $31.50 rounds to $32 (only affects SRP initial pot from 0.5bb dead SB)
 - **Dashboard**: Password hardcoded in source (not a real security measure)
 - **Dashboard**: Relies on third-party CORS proxies which may go down; fallback chain mitigates but doesn't eliminate risk
