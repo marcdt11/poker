@@ -1762,13 +1762,18 @@
         'renderedBoardCount', 'preflopAnimating',
     ];
 
-    function snapshot() {
+    // heroToAct marks snapshots where hero genuinely has a live decision. Only
+    // those show action buttons on restore; all other snapshots are review-only
+    // (no buttons), which also prevents re-acting on a state where hero's action
+    // was already applied (e.g. double-betting a "hero bet $25" step).
+    function snapshot(heroToAct = false) {
         if (!game || !game.history) return;
         const snap = {};
         for (const f of SNAPSHOT_FIELDS) snap[f] = game[f];
         // Treat all dealt board cards as already-rendered so restores never replay
         // a card-deal animation (silent restore, even after an all-in runout).
         snap.renderedBoardCount = game.board.length;
+        snap.heroToAct = !!heroToAct;
         game.history.push(structuredClone(snap));
         game.historyIndex = game.history.length - 1;
         updateHistoryButtons();
@@ -1776,6 +1781,7 @@
 
     function restoreSnapshot(idx) {
         if (!game || !game.history || idx < 0 || idx >= game.history.length) return;
+        const heroToAct = !!game.history[idx].heroToAct;
         Object.assign(game, structuredClone(game.history[idx]));
         game.historyIndex = idx;
         // Clear transient highlight/action-pill state so no stale glow lingers.
@@ -1785,7 +1791,12 @@
         renderHand();
         renderPotPill();
         renderTableSeats();
-        renderActionButtons(game.pendingAction);
+        if (heroToAct) {
+            renderActionButtons(game.pendingAction);
+        } else {
+            // Review-only step: no decision for hero here, so show no buttons/glow.
+            document.getElementById('actionButtons').innerHTML = '';
+        }
         updateHistoryButtons();
     }
 
@@ -2201,8 +2212,9 @@
         document.getElementById('tableArea').classList.remove('preflop-animating');
         renderHand();
         // First reviewable state: flop dealt, before any flop action.
+        // Hero is on the clock here only if hero acts first (OOP).
         game.pendingAction = null;
-        snapshot();
+        snapshot(userActsFirst());
         await startStreetAction();
     }
 
@@ -2320,7 +2332,7 @@
         game.history = [];
         game.historyIndex = -1;
         navLocked = true;
-        snapshot();
+        snapshot(userActsFirst()); // hero on the clock only if hero acts first (OOP)
         startStreetAction();
     }
 
@@ -2451,7 +2463,7 @@
                 await advanceStreet();
             } else {
                 promptUserAction(null);
-                snapshot();
+                snapshot(true); // villain checks to hero — hero's decision
             }
         } else if (action === 'calls') {
             game.oppStack -= amount;
@@ -2477,7 +2489,7 @@
             game.streetActions.push({ actor: 'opp', action: 'bet', amount });
             await showSeatAction(villainSeat, `bet ${fmtDollar(amount)}`);
             promptUserAction({ type: 'bet', amount });
-            snapshot();
+            snapshot(true); // hero faces a bet — hero's decision
         } else if (action === 'raises to') {
             game.oppStack -= amount;
             game.pot += amount;
@@ -2486,7 +2498,7 @@
             game.streetActions.push({ actor: 'opp', action: 'raise', amount });
             await showSeatAction(villainSeat, `raise ${fmtDollar(amount)}`);
             promptUserAction({ type: 'raise', amount });
-            snapshot();
+            snapshot(true); // hero faces a raise — hero's decision
         } else if (action === 'goes all in') {
             game.oppStack -= amount;
             game.pot += amount;
@@ -2495,7 +2507,7 @@
             game.streetActions.push({ actor: 'opp', action: 'allin', amount });
             await showSeatAction(villainSeat, 'all in');
             promptUserAction({ type: 'raise', amount });
-            snapshot();
+            snapshot(true); // hero faces an all-in — hero's decision
         }
     }
 
@@ -2609,8 +2621,9 @@
         game.board.push(game.deck.pop());
         renderHand();
         // Reviewable state: new street card dealt, before any action.
+        // Hero is on the clock here only if hero acts first (OOP).
         game.pendingAction = null;
-        snapshot();
+        snapshot(userActsFirst());
         await delay(900); // Let user see the new card before action starts
 
         await startStreetAction();
