@@ -232,6 +232,27 @@
         }
         .new-street-btn:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
 
+        .history-nav {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 8px;
+        }
+        .history-nav-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: var(--radius-lg);
+            color: var(--text-secondary);
+            padding: 8px 18px;
+            font-family: var(--font-sans);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s, border-color 0.2s, color 0.2s;
+        }
+        .history-nav-btn:hover:not(:disabled) { border-color: rgba(255,255,255,0.4); color: #fff; }
+        .history-nav-btn:disabled { opacity: 0.3; cursor: default; }
+
         /* ===== HAND SCREEN ===== */
         .hand-layout {
             display: flex;
@@ -1491,6 +1512,10 @@
             </div>
             <button class="new-hand-btn" id="btnNewHand">New Hand</button>
             <button class="new-street-btn" id="btnNewStreet">New Flop</button>
+            <div class="history-nav" id="historyNav">
+                <button class="history-nav-btn" id="btnHistoryBack" title="Step back" disabled>◀</button>
+                <button class="history-nav-btn" id="btnHistoryForward" title="Step forward" disabled>▶</button>
+            </div>
             </div>
 
             <!-- TABLE + ACTIONS -->
@@ -1518,8 +1543,10 @@
 
                         <!-- CONTROL BAR: New Hand on mobile play mode -->
                         <div class="control-bar" id="controlBar">
+                            <button class="history-nav-btn" id="btnHistoryBackMobile" title="Step back" disabled>◀</button>
                             <button class="new-hand-btn mobile-new-hand" id="btnNewHandMobile">New Hand</button>
                             <button class="new-street-btn mobile-new-street" id="btnNewStreetMobile">New Flop</button>
+                            <button class="history-nav-btn" id="btnHistoryForwardMobile" title="Step forward" disabled>▶</button>
                         </div>
 
                         <div class="table-actions-area" id="actionsArea">
@@ -1720,6 +1747,61 @@
     let game = null;
     let sessionLog = [];
     let handNumber = 0;
+
+    // ===== HAND HISTORY NAVIGATION =====
+    // navLocked is true while an action/animation sequence is running, so the
+    // back/forward buttons stay disabled until control returns to the user.
+    let navLocked = false;
+    // Fields deep-copied into each snapshot (everything needed to silently re-render
+    // a prior visual state). Transient glow state (activeTurn/seatAction) and
+    // spot/spotKey/heroCardsRendered are intentionally excluded.
+    const SNAPSHOT_FIELDS = [
+        'deck', 'board', 'pot', 'displayPot', 'userStack', 'oppStack', 'streetIndex',
+        'actions', 'streetActions', 'seatStates', 'seatBets', 'holeCards',
+        'heroCheckedBackLastStreet', 'allIn', 'userFolded', 'pendingAction',
+        'renderedBoardCount', 'preflopAnimating',
+    ];
+
+    function snapshot() {
+        if (!game || !game.history) return;
+        const snap = {};
+        for (const f of SNAPSHOT_FIELDS) snap[f] = game[f];
+        // Treat all dealt board cards as already-rendered so restores never replay
+        // a card-deal animation (silent restore, even after an all-in runout).
+        snap.renderedBoardCount = game.board.length;
+        game.history.push(structuredClone(snap));
+        game.historyIndex = game.history.length - 1;
+        updateHistoryButtons();
+    }
+
+    function restoreSnapshot(idx) {
+        if (!game || !game.history || idx < 0 || idx >= game.history.length) return;
+        Object.assign(game, structuredClone(game.history[idx]));
+        game.historyIndex = idx;
+        // Clear transient highlight/action-pill state so no stale glow lingers.
+        game.seatAction = null;
+        game.activeTurn = null;
+        stopShotClock();
+        renderHand();
+        renderPotPill();
+        renderTableSeats();
+        renderActionButtons(game.pendingAction);
+        updateHistoryButtons();
+    }
+
+    function updateHistoryButtons() {
+        const hasHistory = !!(game && game.history && game.history.length > 0);
+        const canBack = hasHistory && !navLocked && game.historyIndex > 0;
+        const canForward = hasHistory && !navLocked && game.historyIndex < game.history.length - 1;
+        for (const id of ['btnHistoryBack', 'btnHistoryBackMobile']) {
+            const el = document.getElementById(id);
+            if (el) el.disabled = !canBack;
+        }
+        for (const id of ['btnHistoryForward', 'btnHistoryForwardMobile']) {
+            const el = document.getElementById(id);
+            if (el) el.disabled = !canForward;
+        }
+    }
 
     // ===== SHOT CLOCK =====
     const SHOTCLOCK_STORAGE_KEY = 'driller_shotclock_v1';
@@ -2118,6 +2200,9 @@
         game.board.push(game.deck.pop(), game.deck.pop(), game.deck.pop());
         document.getElementById('tableArea').classList.remove('preflop-animating');
         renderHand();
+        // First reviewable state: flop dealt, before any flop action.
+        game.pendingAction = null;
+        snapshot();
         await startStreetAction();
     }
 
@@ -2162,8 +2247,12 @@
             preflopAnimating: true,
             seatStates: {},
             seatBets: {},
+            history: [],
+            historyIndex: -1,
         };
 
+        navLocked = true; // preflop animating — no rewind until flop is dealt
+        updateHistoryButtons();
         renderHand();
         // Hide board/actions during preflop animation
         document.getElementById('tableArea').classList.add('preflop-animating');
@@ -2227,6 +2316,11 @@
         renderPotPill();
 
         renderHand();
+        // Reroll discards the old runout — start a fresh history seeded at the new street.
+        game.history = [];
+        game.historyIndex = -1;
+        navLocked = true;
+        snapshot();
         startStreetAction();
     }
 
@@ -2263,6 +2357,9 @@
 
     async function doOpponentAction(facingBet) {
         let action, amount = 0;
+
+        navLocked = true; // villain acting — disable rewind until control returns
+        updateHistoryButtons();
 
         if (game.oppStack <= 0 || game.allIn) {
             await advanceStreet();
@@ -2349,9 +2446,12 @@
             game.streetActions.push({ actor: 'opp', action: 'check' });
             await showSeatAction(villainSeat, 'check');
             if (game.streetActions.some(a => a.actor === 'user')) {
+                game.pendingAction = null;
+                snapshot();
                 await advanceStreet();
             } else {
                 promptUserAction(null);
+                snapshot();
             }
         } else if (action === 'calls') {
             game.oppStack -= amount;
@@ -2360,6 +2460,8 @@
             logAction('Opponent', 'calls', amount);
             game.streetActions.push({ actor: 'opp', action: 'call', amount });
             await showSeatAction(villainSeat, 'call');
+            game.pendingAction = null;
+            snapshot();
             if (game.oppStack <= 0 || game.userStack <= 0) {
                 game.allIn = true;
                 collectBetsIntoPot();
@@ -2375,6 +2477,7 @@
             game.streetActions.push({ actor: 'opp', action: 'bet', amount });
             await showSeatAction(villainSeat, `bet ${fmtDollar(amount)}`);
             promptUserAction({ type: 'bet', amount });
+            snapshot();
         } else if (action === 'raises to') {
             game.oppStack -= amount;
             game.pot += amount;
@@ -2383,6 +2486,7 @@
             game.streetActions.push({ actor: 'opp', action: 'raise', amount });
             await showSeatAction(villainSeat, `raise ${fmtDollar(amount)}`);
             promptUserAction({ type: 'raise', amount });
+            snapshot();
         } else if (action === 'goes all in') {
             game.oppStack -= amount;
             game.pot += amount;
@@ -2391,12 +2495,15 @@
             game.streetActions.push({ actor: 'opp', action: 'allin', amount });
             await showSeatAction(villainSeat, 'all in');
             promptUserAction({ type: 'raise', amount });
+            snapshot();
         }
     }
 
     function promptUserAction(facingBet) {
         game.pendingAction = facingBet;
         renderActionButtons(facingBet);
+        navLocked = false; // user's turn — allow rewind/forward
+        updateHistoryButtons();
         startShotClock();
     }
 
@@ -2405,6 +2512,15 @@
         document.getElementById('actionButtons').innerHTML = '';
         hideSizing();
         stopShotClock();
+
+        // Branch-and-replay: if the user acts while rewound, drop the discarded
+        // future and reshuffle the remaining deck so the new runout is fresh.
+        if (game.history && game.historyIndex < game.history.length - 1) {
+            game.history = game.history.slice(0, game.historyIndex + 1);
+            game.deck = shuffle(game.deck);
+        }
+        navLocked = true; // processing action — disable rewind until control returns
+        updateHistoryButtons();
 
         const heroSeat = game.spot.heroSeat;
 
@@ -2420,6 +2536,8 @@
             logAction('You', 'check', 0);
             game.streetActions.push({ actor: 'user', action: 'check' });
             await showSeatAction(heroSeat, 'check');
+            game.pendingAction = null;
+            snapshot();
             if (game.streetActions.some(a => a.actor === 'opp')) {
                 await advanceStreet();
             } else {
@@ -2433,6 +2551,8 @@
             logAction('You', 'call', callAmount);
             game.streetActions.push({ actor: 'user', action: 'call', amount: callAmount });
             await showSeatAction(heroSeat, 'call');
+            game.pendingAction = null;
+            snapshot();
             if (game.userStack <= 0 || game.oppStack <= 0) {
                 game.allIn = true;
                 collectBetsIntoPot();
@@ -2451,6 +2571,8 @@
             game.streetActions.push({ actor: 'user', action, amount });
             await showSeatAction(heroSeat, actionText);
             if (isAllIn) game.allIn = true;
+            game.pendingAction = null;
+            snapshot();
             await doOpponentAction({ type: action, amount });
         }
     }
@@ -2486,6 +2608,9 @@
         game.deck.pop(); // burn
         game.board.push(game.deck.pop());
         renderHand();
+        // Reviewable state: new street card dealt, before any action.
+        game.pendingAction = null;
+        snapshot();
         await delay(900); // Let user see the new card before action starts
 
         await startStreetAction();
@@ -2518,6 +2643,10 @@
             userStack: game.userStack,
             oppStack: game.oppStack,
         });
+
+        // Final reviewable state — hand ended. Back/forward stay available for review.
+        navLocked = false;
+        snapshot();
 
         // Hand ends silently — no banner, just ready for next hand
     }
@@ -2987,6 +3116,18 @@
         document.getElementById('btnNewHandMobile').addEventListener('click', startHand);
         document.getElementById('btnNewStreet').addEventListener('click', rerollStreet);
         document.getElementById('btnNewStreetMobile').addEventListener('click', rerollStreet);
+
+        // Hand history navigation (back / forward)
+        function historyBack() {
+            if (game && !navLocked && game.historyIndex > 0) restoreSnapshot(game.historyIndex - 1);
+        }
+        function historyForward() {
+            if (game && !navLocked && game.historyIndex < game.history.length - 1) restoreSnapshot(game.historyIndex + 1);
+        }
+        document.getElementById('btnHistoryBack').addEventListener('click', historyBack);
+        document.getElementById('btnHistoryBackMobile').addEventListener('click', historyBack);
+        document.getElementById('btnHistoryForward').addEventListener('click', historyForward);
+        document.getElementById('btnHistoryForwardMobile').addEventListener('click', historyForward);
 
         // Mobile mode switching
         const appEl = document.querySelector('.app');
