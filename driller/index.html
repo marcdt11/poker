@@ -2465,7 +2465,7 @@
             if (game.oppStack <= 0 || game.userStack <= 0) {
                 game.allIn = true;
                 collectBetsIntoPot();
-                runOutBoard();
+                await runOutBoard();
             } else {
                 await advanceStreet();
             }
@@ -2556,7 +2556,7 @@
             if (game.userStack <= 0 || game.oppStack <= 0) {
                 game.allIn = true;
                 collectBetsIntoPot();
-                runOutBoard();
+                await runOutBoard();
             } else {
                 await advanceStreet();
             }
@@ -2616,12 +2616,16 @@
         await startStreetAction();
     }
 
-    function runOutBoard() {
+    async function runOutBoard() {
+        // All-in: brief pause so the user registers the all-in before the runout.
+        await delay(600);
         while (game.board.length < 5) {
             game.deck.pop(); // burn
             game.board.push(game.deck.pop());
         }
         game.streetIndex = 3;
+        renderHand(); // reveal the remaining community cards (staggered deal animation)
+        await delay(900); // let the runout land before the hand ends
         endHand();
     }
 
