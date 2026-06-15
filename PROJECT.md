@@ -1,9 +1,10 @@
 # Poker Tools — Project Overview
 
 ## What It Is
-A collection of web-based poker tools hosted at `poker.marctorrence.com`. Currently two apps:
-1. **Dashboard** — Analytics dashboard that pulls session data from a Google Sheet and displays stats, charts, and filterable session history.
-2. **RTP Driller** — Scenario drilling tool for NLHE study groups. Automates card dealing and opponent actions so players can focus on articulating their thought process street-by-street.
+A collection of web-based poker tools hosted at `poker.marctorrence.com`. Currently:
+1. **RTP Driller** — Scenario drilling tool for NLHE study groups. Automates card dealing and opponent actions so players can focus on articulating their thought process street-by-street.
+
+> The **Dashboard** (analytics from a Google Sheet) used to live here at `/dashboard/`. It now lives in its own repo (`marcdt11/dashboard`) at `dashboard.marctorrence.com`, deliberately isolated from this public-facing tools site so it is not discoverable by trimming the poker URL.
 
 ## Architecture
 - **No build tools, no frameworks.** Vanilla HTML/CSS/JS, static files served by GitHub Pages.
@@ -16,10 +17,8 @@ A collection of web-based poker tools hosted at `poker.marctorrence.com`. Curren
 ├── CLAUDE.md              # CTO instructions (Claude-only)
 ├── PROJECT.md             # This file
 ├── BACKLOG.md             # Feature backlog + completed items
-├── CNAME                  # Custom domain config
-├── index.html             # Landing page → links to /dashboard/ and /driller/
-├── dashboard/
-│   └── index.html         # Analytics dashboard
+├── CNAME                  # Custom domain config (poker.marctorrence.com)
+├── index.html             # Landing page → links to /driller/ (+ future tools)
 └── driller/
     └── index.html         # RTP Driller app
 ```
@@ -29,31 +28,9 @@ A collection of web-based poker tools hosted at `poker.marctorrence.com`. Curren
 - Repo: `marcdt11/poker`
 - Custom domain: `poker.marctorrence.com`
 - No CI/CD — push to main auto-deploys
-
----
-
-## Dashboard — Technical Details
-
-### Data Source
-- Published Google Sheet CSV fetched client-side
-- CORS proxy fallback chain (allorigins → corsproxy.io → api.codetabs.com) for reliable cross-origin fetching
-- Cache-busting query param appended to each request
-- Fetch kicks off on script load (parallel with the password gate) rather than after submit, so data is ready by the time the user enters the password — `csvPromise` is created at module scope and awaited inside `init()`
-
-### Authentication
-- Simple password gate stored in `sessionStorage` (password hardcoded in source — not secure, just a casual gate)
-
-### Features
-- **KPI Cards** — Total profit, hourly rate, session count, win rate, avg session hours, best/worst session
-- **Cumulative Profit Chart** — Chart.js line chart with toggle between cumulative profit and hourly rate views
-- **Filters** — Multiselect dropdowns for location, stakes, game type + date range inputs. Dropdowns show only options available given other active filters. Select all/none controls.
-- **Session Table** — Paginated (25 rows), sortable, showing date, location, game, stakes, hours, buy-in, cash-out, profit
-- **Responsive** — Mobile-friendly layout; viewport `maximum-scale=1.0` prevents iOS auto-zoom on input focus (e.g. tapping the password field) which would otherwise persist after the keyboard closes; `text-size-adjust: 100%` on `body` prevents iOS Accessibility "Larger Text" from inflating text and overflowing the viewport (user pinch-zoom still works on iOS 10+)
-
-### Design System
-- Dark GitHub-style theme (`--bg-primary: #0d1117`)
-- Fonts: Outfit (UI) + JetBrains Mono (numbers)
-- Green/red profit coloring
+- **Dashboard is a separate site:** repo `marcdt11/dashboard` → `dashboard.marctorrence.com`
+  (own GitHub Pages site + `CNAME`). DNS: `dashboard` CNAME → `marcdt11.github.io` (GoDaddy).
+  Kept off this repo so it can't be reached from the public poker domain.
 
 ---
 
@@ -107,5 +84,4 @@ CSS custom properties matching PreflopTrainer's visual style:
 - Default: IP, SRP, 200bb, $2/$5
 
 ## Known Issues
-- **Dashboard**: Password hardcoded in source (not a real security measure)
-- **Dashboard**: Relies on third-party CORS proxies which may go down; fallback chain mitigates but doesn't eliminate risk
+_(none known — Dashboard issues now tracked in the `marcdt11/dashboard` repo)_
