@@ -1760,6 +1760,7 @@
         'actions', 'streetActions', 'seatStates', 'seatBets', 'holeCards',
         'heroCheckedBackLastStreet', 'allIn', 'userFolded', 'pendingAction',
         'renderedBoardCount', 'preflopAnimating',
+        'streetStartPot', 'streetStartUserStack', 'streetStartOppStack',
     ];
 
     // heroToAct marks snapshots where hero genuinely has a live decision. Only
@@ -2319,11 +2320,11 @@
         game.seatAction = null;
         game.seatBets = {};
 
-        // Reset stacks to what they were at start of this street
-        game.userStack = config.stack - game.spot.userInvested;
-        game.oppStack = config.stack - game.spot.oppInvested;
-        // Recalculate pot as initial pot (actions from previous streets are lost on reroll)
-        game.pot = game.spot.pot;
+        // Reset pot/stacks to what they were at the start of THIS street, preserving
+        // betting from prior streets (e.g. flop bets when rerolling the turn).
+        game.userStack = game.streetStartUserStack ?? (config.stack - game.spot.userInvested);
+        game.oppStack = game.streetStartOppStack ?? (config.stack - game.spot.oppInvested);
+        game.pot = game.streetStartPot ?? game.spot.pot;
         game.displayPot = game.pot;
         renderPotPill();
 
@@ -2358,6 +2359,11 @@
             game.streetActions[1].action === 'check';
         game.streetActions = [];
         game.pendingAction = null;
+        // Capture pot/stacks at the start of this street so a reroll (New Flop/Turn/River)
+        // re-deals the current street's card without discarding prior streets' betting.
+        game.streetStartPot = game.pot;
+        game.streetStartUserStack = game.userStack;
+        game.streetStartOppStack = game.oppStack;
         updateNewStreetButton();
 
         if (userActsFirst()) {
