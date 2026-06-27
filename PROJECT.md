@@ -19,9 +19,25 @@ A collection of web-based poker tools hosted at `poker.marctorrence.com`. Curren
 ├── BACKLOG.md             # Feature backlog + completed items
 ├── CNAME                  # Custom domain config (poker.marctorrence.com)
 ├── index.html             # Landing page → links to /driller/ (+ future tools)
+├── package.json           # Dev-only test tooling (vitest + happy-dom); NOT deployed
 └── driller/
-    └── index.html         # RTP Driller app
+    ├── index.html         # RTP Driller app (markup + CSS; loads app.js)
+    ├── app.js             # RTP Driller game engine (extracted from index.html)
+    └── tests/             # Headless regression tests (see Testing below)
+        ├── README.md
+        ├── harness.js     # Loads index.html+app.js in happy-dom; seeded RNG; instant animations
+        ├── helpers.js     # Shared driver (playHand, advanceToStreet, chipTotal, …)
+        ├── smoke.test.js
+        ├── fuzz.test.js
+        ├── reroll.test.js
+        ├── nav.test.js
+        └── perturbation.test.js
 ```
+
+> **Note:** the Driller logic used to be an inline `<script>` inside
+> `driller/index.html`. It now lives in `driller/app.js` (loaded via
+> `<script src="app.js">`) so it can be unit-tested headless. Behavior is
+> identical; the split exists purely for testability.
 
 ## Deployment
 - GitHub Pages from `main` branch, root `/` path
@@ -50,7 +66,13 @@ CSS custom properties matching PreflopTrainer's visual style:
 - Fonts: Outfit (UI) + JetBrains Mono (numbers/data)
 - Loaded via Google Fonts CDN
 
-### Core Modules (all in `driller/index.html`)
+### Testing
+- **Stack:** Vitest + happy-dom, run with `npm test` (or `npm run test:watch`). Dev-only deps in `package.json`; never deployed (Pages serves static files only). `node_modules/` is gitignored.
+- **Approach:** Tests load the *real* `index.html` + `app.js` headless via `driller/tests/harness.js`. Three test seams in `app.js` make this possible (all no-ops in the browser): `TEST_MODE` (skips `delay()` animation waits), a swappable `_rng`/`rng()` (seeded, deterministic shuffles + villain actions), and a `window.__driller` export exposing game state + core functions. `startHand`/`rerollStreet`/`startStreetAction` return their async chains so tests can await them.
+- **Master invariant:** `pot + userStack + oppStack` is constant from the flop onward (bets are added to `game.pot` immediately, not on collect). Drift = a pot/stack bug. The fuzzers assert this after every action, reroll, and history nav across all spots/positions/stacks/stakes.
+- **Coverage:** straight-play fuzz (`fuzz`), reroll street-start restoration (`reroll`), history nav determinism + branch-and-replay (`nav`), and combined reroll+rewind perturbation (`perturbation`). See `driller/tests/README.md`.
+
+### Core Modules (all in `driller/app.js`)
 - **Deck Engine** — Fisher-Yates shuffle, deal with burn cards, no duplicates. Hero hole cards dealt from preflop raising ranges (embedded per spot from PreflopTrainer data)
 - **Game State Machine** — street progression (flop→turn→river→showdown), pot/stack tracking, action log
 - **Preflop Spot Definitions** — 7 preflop configs with fixed pot sizes, positions, narratives, and raising ranges

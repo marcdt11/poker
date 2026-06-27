@@ -14,6 +14,7 @@
 ## Driller
 
 ### Completed
+- [x] Headless regression test suite (Vitest + happy-dom): extracted engine to `driller/app.js`, chip-conservation fuzzers across all spots/stacks/stakes, reroll street-start restoration, history nav determinism + branch-and-replay, and a combined reroll+rewind perturbation fuzzer. Run with `npm test`. Validated by injecting a known pot bug and confirming the suite goes red.
 - [x] Core deck engine with shuffle and burn cards
 - [x] Range-based hero dealing (preflop raising ranges from PreflopTrainer, per spot)
 - [x] Game state machine (street progression, pot/stack tracking)
