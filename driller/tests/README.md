@@ -15,6 +15,16 @@ npm test      # run the whole suite
 
 `npm run test:watch` re-runs automatically as you edit.
 
+### Block bad pushes automatically (one-time setup)
+
+```bash
+git config core.hooksPath .githooks
+```
+
+After this, `git push` runs the suite first and **refuses to push if anything
+fails**. Override in an emergency with `git push --no-verify`. (This is
+client-side only — it does not guard edits made through the GitHub website.)
+
 > The test tools (`vitest`, `happy-dom`) are **dev-only**. They are not part of
 > the deployed site — GitHub Pages only serves the static `index.html` + `app.js`.
 
